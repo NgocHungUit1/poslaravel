@@ -61,6 +61,8 @@
                 <tr>
                     <th class="not-exported"></th>
                     <th>{{trans('file.Date')}}</th>
+                    <th>{{trans('file.Document')}}</th>
+                    <th>{{trans('file.Image')}}</th>
                     <th>{{trans('file.reference')}}</th>
                     <th>{{trans('file.Warehouse')}}</th>
                     <th>{{trans('file.Biller')}}</th>
@@ -77,13 +79,18 @@
                 <th>{{trans('file.Total')}}</th>
                 <th></th>
                 <th></th>
+
+                <th></th>
+                <th></th>
+
                 <th></th>
                 <th></th>
                 <th></th>
                 <th></th>
-                <th></th>
+                <th></th> <!-- Ensure this is empty for grand total -->
                 <th></th>
             </tfoot>
+
         </table>
     </div>
 </section>
@@ -220,6 +227,8 @@
         "columns": [
             {"data": "key"},
             {"data": "date"},
+            {"data": "image"},
+            {"data": "document"},
             {"data": "reference_no"},
             {"data": "warehouse"},
             {"data": "biller"},
@@ -369,10 +378,10 @@
         if (dt_selector.rows( '.selected' ).any() && is_calling_first) {
             var rows = dt_selector.rows( '.selected' ).indexes();
 
-            $( dt_selector.column( 8 ).footer() ).html(dt_selector.cells( rows, 8, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 10 ).footer() ).html(dt_selector.cells( rows, 10, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
         }
         else {
-            $( dt_selector.column( 8 ).footer() ).html(dt_selector.cells( rows, 8, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 10 ).footer() ).html(dt_selector.cells( rows, 10, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
 

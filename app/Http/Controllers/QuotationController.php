@@ -39,25 +39,24 @@ class QuotationController extends Controller
     public function index(Request $request)
     {
         $role = Role::find(Auth::user()->role_id);
-        if($role->hasPermissionTo('quotes-index')){
-            if($request->input('warehouse_id'))
+        if ($role->hasPermissionTo('quotes-index')) {
+            if ($request->input('warehouse_id'))
                 $warehouse_id = $request->input('warehouse_id');
             else
                 $warehouse_id = 0;
 
-            if($request->input('starting_date')) {
+            if ($request->input('starting_date')) {
                 $starting_date = $request->input('starting_date');
                 $ending_date = $request->input('ending_date');
-            }
-            else {
-                $starting_date = date("Y-m-d", strtotime(date('Y-m-d', strtotime('-1 year', strtotime(date('Y-m-d') )))));
+            } else {
+                $starting_date = date("Y-m-d", strtotime(date('Y-m-d', strtotime('-1 year', strtotime(date('Y-m-d'))))));
                 $ending_date = date("Y-m-d");
             }
 
             $permissions = Role::findByName($role->name)->permissions;
             foreach ($permissions as $permission)
                 $all_permission[] = $permission->name;
-            if(empty($all_permission))
+            if (empty($all_permission))
                 $all_permission[] = 'dummy text';
 
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
@@ -67,8 +66,7 @@ class QuotationController extends Controller
             else
                 $lims_quotation_all = Quotation::with('biller', 'customer', 'supplier', 'user')->orderBy('id', 'desc')->get();*/
             return view('backend.quotation.index', compact('lims_warehouse_list', 'all_permission', 'warehouse_id', 'starting_date', 'ending_date'));
-        }
-        else
+        } else
             return redirect()->back()->with('not_permitted', 'Sorry! You are not allowed to access this module');
     }
 
@@ -82,267 +80,294 @@ class QuotationController extends Controller
         );
 
         $warehouse_id = $request->input('warehouse_id');
-        if(Auth::user()->role_id > 2 && config('staff_access') == 'own')
+        if (Auth::user()->role_id > 2 && config('staff_access') == 'own')
             $totalData = Quotation::where('user_id', Auth::id())
-                        ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-                        ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                        ->count();
+                ->whereDate('created_at', '>=', $request->input('starting_date'))
+                ->whereDate('created_at', '<=', $request->input('ending_date'))
+                ->count();
         //check staff access
-        elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
+        elseif (Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
             $totalData = Quotation::where('warehouse_id', Auth::user()->warehouse_id)
-            ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-            ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-            ->count();
-        elseif($warehouse_id != 0)
+                ->whereDate('created_at', '>=', $request->input('starting_date'))
+                ->whereDate('created_at', '<=', $request->input('ending_date'))
+                ->count();
+        elseif ($warehouse_id != 0)
             $totalData = Quotation::where('warehouse_id', $warehouse_id)
-                        ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-                        ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                        ->count();
-        elseif($warehouse_id != 0)
+                ->whereDate('created_at', '>=', $request->input('starting_date'))
+                ->whereDate('created_at', '<=', $request->input('ending_date'))
+                ->count();
+        elseif ($warehouse_id != 0)
             $totalData = Quotation::where('warehouse_id', $warehouse_id)
-                        ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-                        ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                        ->count();
+                ->whereDate('created_at', '>=', $request->input('starting_date'))
+                ->whereDate('created_at', '<=', $request->input('ending_date'))
+                ->count();
         else
-            $totalData = Quotation::whereDate('created_at', '>=' ,$request->input('starting_date'))
-                        ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                        ->count();
+            $totalData = Quotation::whereDate('created_at', '>=', $request->input('starting_date'))
+                ->whereDate('created_at', '<=', $request->input('ending_date'))
+                ->count();
 
         $totalFiltered = $totalData;
 
-        if($request->input('length') != -1)
+        if ($request->input('length') != -1)
             $limit = $request->input('length');
         else
             $limit = $totalData;
         $start = $request->input('start');
         $order = $columns[$request->input('order.0.column')];
         $dir = $request->input('order.0.dir');
-        if(empty($request->input('search.value'))) {
-            if(Auth::user()->role_id > 2 && config('staff_access') == 'own')
+        if (empty($request->input('search.value'))) {
+            if (Auth::user()->role_id > 2 && config('staff_access') == 'own')
                 $quotations = Quotation::with('biller', 'customer', 'supplier', 'user')->offset($start)
-                            ->where('user_id', Auth::id())
-                            ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-                            ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                            ->limit($limit)
-                            ->orderBy($order, $dir)
-                            ->get();
-            elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
+                    ->where('user_id', Auth::id())
+                    ->whereDate('created_at', '>=', $request->input('starting_date'))
+                    ->whereDate('created_at', '<=', $request->input('ending_date'))
+                    ->limit($limit)
+                    ->orderBy($order, $dir)
+                    ->get();
+            elseif (Auth::user()->role_id > 2 && config('staff_access') == 'warehouse')
                 $quotations = Quotation::with('biller', 'customer', 'supplier', 'user')->offset($start)
-                            ->where('warehouse_id', Auth::user()->warehouse_id)
-                            ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-                            ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                            ->limit($limit)
-                            ->orderBy($order, $dir)
-                            ->get();
-            elseif($warehouse_id != 0)
+                    ->where('warehouse_id', Auth::user()->warehouse_id)
+                    ->whereDate('created_at', '>=', $request->input('starting_date'))
+                    ->whereDate('created_at', '<=', $request->input('ending_date'))
+                    ->limit($limit)
+                    ->orderBy($order, $dir)
+                    ->get();
+            elseif ($warehouse_id != 0)
                 $quotations = Quotation::with('biller', 'customer', 'supplier', 'user')->offset($start)
-                            ->where('warehouse_id', $warehouse_id)
-                            ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-                            ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                            ->limit($limit)
-                            ->orderBy($order, $dir)
-                            ->get();
+                    ->where('warehouse_id', $warehouse_id)
+                    ->whereDate('created_at', '>=', $request->input('starting_date'))
+                    ->whereDate('created_at', '<=', $request->input('ending_date'))
+                    ->limit($limit)
+                    ->orderBy($order, $dir)
+                    ->get();
             else
                 $quotations = Quotation::with('biller', 'customer', 'supplier', 'user')->offset($start)
-                            ->whereDate('created_at', '>=' ,$request->input('starting_date'))
-                            ->whereDate('created_at', '<=' ,$request->input('ending_date'))
-                            ->limit($limit)
-                            ->orderBy($order, $dir)
-                            ->get();
-        }
-        else
-        {
+                    ->whereDate('created_at', '>=', $request->input('starting_date'))
+                    ->whereDate('created_at', '<=', $request->input('ending_date'))
+                    ->limit($limit)
+                    ->orderBy($order, $dir)
+                    ->get();
+        } else {
             $search = $request->input('search.value');
-            if(Auth::user()->role_id > 2 && config('staff_access') == 'own') {
+            if (Auth::user()->role_id > 2 && config('staff_access') == 'own') {
                 $quotations =  Quotation::select('quotations.*')
-                            ->with('biller', 'customer', 'supplier', 'user')
-                            ->join('billers', 'quotations.biller_id', '=', 'billers.id')
-                            ->join('customers', 'quotations.customer_id', '=', 'customers.id')
-                            ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
-                            ->whereDate('quotations.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
-                            ->where('quotations.user_id', Auth::id())
-                            ->orwhere([
-                                ['quotations.reference_no', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['billers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['customers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['suppliers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->offset($start)
-                            ->limit($limit)
-                            ->orderBy($order,$dir)->get();
+                    ->with('biller', 'customer', 'supplier', 'user')
+                    ->join('billers', 'quotations.biller_id', '=', 'billers.id')
+                    ->join('customers', 'quotations.customer_id', '=', 'customers.id')
+                    ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
+                    ->whereDate('quotations.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+                    ->where('quotations.user_id', Auth::id())
+                    ->orwhere([
+                        ['quotations.reference_no', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->orwhere([
+                        ['billers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->orwhere([
+                        ['customers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->orwhere([
+                        ['suppliers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->offset($start)
+                    ->limit($limit)
+                    ->orderBy($order, $dir)->get();
 
                 $totalFiltered = Quotation::join('billers', 'quotations.biller_id', '=', 'billers.id')
-                            ->join('customers', 'quotations.customer_id', '=', 'customers.id')
-                            ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
-                            ->whereDate('quotations.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
-                            ->where('quotations.user_id', Auth::id())
-                            ->orwhere([
-                                ['quotations.reference_no', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['billers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['customers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->orwhere([
-                                ['suppliers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.user_id', Auth::id()]
-                            ])
-                            ->count();
-            }
-            elseif(Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
+                    ->join('customers', 'quotations.customer_id', '=', 'customers.id')
+                    ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
+                    ->whereDate('quotations.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+                    ->where('quotations.user_id', Auth::id())
+                    ->orwhere([
+                        ['quotations.reference_no', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->orwhere([
+                        ['billers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->orwhere([
+                        ['customers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->orwhere([
+                        ['suppliers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.user_id', Auth::id()]
+                    ])
+                    ->count();
+            } elseif (Auth::user()->role_id > 2 && config('staff_access') == 'warehouse') {
                 $quotations =  Quotation::select('quotations.*')
-                            ->with('biller', 'customer', 'supplier', 'user')
-                            ->join('billers', 'quotations.biller_id', '=', 'billers.id')
-                            ->join('customers', 'quotations.customer_id', '=', 'customers.id')
-                            ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
-                            ->whereDate('quotations.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
-                            ->where('quotations.user_id', Auth::id())
-                            ->orwhere([
-                                ['quotations.reference_no', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['billers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['customers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['suppliers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->offset($start)
-                            ->limit($limit)
-                            ->orderBy($order,$dir)->get();
+                    ->with('biller', 'customer', 'supplier', 'user')
+                    ->join('billers', 'quotations.biller_id', '=', 'billers.id')
+                    ->join('customers', 'quotations.customer_id', '=', 'customers.id')
+                    ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
+                    ->whereDate('quotations.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+                    ->where('quotations.user_id', Auth::id())
+                    ->orwhere([
+                        ['quotations.reference_no', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->orwhere([
+                        ['billers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->orwhere([
+                        ['customers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->orwhere([
+                        ['suppliers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->offset($start)
+                    ->limit($limit)
+                    ->orderBy($order, $dir)->get();
 
                 $totalFiltered = Quotation::join('billers', 'quotations.biller_id', '=', 'billers.id')
-                            ->join('customers', 'quotations.customer_id', '=', 'customers.id')
-                            ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
-                            ->whereDate('quotations.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
-                            ->where('quotations.user_id', Auth::id())
-                            ->orwhere([
-                                ['quotations.reference_no', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['billers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['customers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->orwhere([
-                                ['suppliers.name', 'LIKE', "%{$search}%"],
-                                ['quotations.warehouse_id', Auth::user()->warehouse_id]
-                            ])
-                            ->count();
-            }
-            else {
+                    ->join('customers', 'quotations.customer_id', '=', 'customers.id')
+                    ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
+                    ->whereDate('quotations.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+                    ->where('quotations.user_id', Auth::id())
+                    ->orwhere([
+                        ['quotations.reference_no', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->orwhere([
+                        ['billers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->orwhere([
+                        ['customers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->orwhere([
+                        ['suppliers.name', 'LIKE', "%{$search}%"],
+                        ['quotations.warehouse_id', Auth::user()->warehouse_id]
+                    ])
+                    ->count();
+            } else {
                 $quotations =  Quotation::select('quotations.*')
-                            ->with('biller', 'customer', 'supplier', 'user')
-                            ->join('billers', 'quotations.biller_id', '=', 'billers.id')
-                            ->join('customers', 'quotations.customer_id', '=', 'customers.id')
-                            ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
-                            ->whereDate('quotations.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
-                            ->orwhere('quotations.reference_no', 'LIKE', "%{$search}%")
-                            ->orwhere('billers.name', 'LIKE', "%{$search}%")
-                            ->orwhere('customers.name', 'LIKE', "%{$search}%")
-                            ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
-                            ->offset($start)
-                            ->limit($limit)
-                            ->orderBy($order,$dir)
-                            ->get();
+                    ->with('biller', 'customer', 'supplier', 'user')
+                    ->join('billers', 'quotations.biller_id', '=', 'billers.id')
+                    ->join('customers', 'quotations.customer_id', '=', 'customers.id')
+                    ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
+                    ->whereDate('quotations.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+                    ->orwhere('quotations.reference_no', 'LIKE', "%{$search}%")
+                    ->orwhere('billers.name', 'LIKE', "%{$search}%")
+                    ->orwhere('customers.name', 'LIKE', "%{$search}%")
+                    ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
+                    ->offset($start)
+                    ->limit($limit)
+                    ->orderBy($order, $dir)
+                    ->get();
 
                 $totalFiltered = Quotation::join('billers', 'quotations.biller_id', '=', 'billers.id')
-                            ->join('customers', 'quotations.customer_id', '=', 'customers.id')
-                            ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
-                            ->whereDate('quotations.created_at', '=' , date('Y-m-d', strtotime(str_replace('/', '-', $search))))
-                            ->orwhere('quotations.reference_no', 'LIKE', "%{$search}%")
-                            ->orwhere('billers.name', 'LIKE', "%{$search}%")
-                            ->orwhere('customers.name', 'LIKE', "%{$search}%")
-                            ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
-                            ->count();
+                    ->join('customers', 'quotations.customer_id', '=', 'customers.id')
+                    ->leftJoin('suppliers', 'quotations.supplier_id', '=', 'suppliers.id')
+                    ->whereDate('quotations.created_at', '=', date('Y-m-d', strtotime(str_replace('/', '-', $search))))
+                    ->orwhere('quotations.reference_no', 'LIKE', "%{$search}%")
+                    ->orwhere('billers.name', 'LIKE', "%{$search}%")
+                    ->orwhere('customers.name', 'LIKE', "%{$search}%")
+                    ->orwhere('suppliers.name', 'LIKE', "%{$search}%")
+                    ->count();
             }
         }
         $data = array();
-        if(!empty($quotations))
-        {
-            foreach ($quotations as $key => $quotation)
-            {
+        if (!empty($quotations)) {
+            foreach ($quotations as $key => $quotation) {
                 $nestedData['id'] = $quotation->id;
                 $nestedData['key'] = $key;
                 $nestedData['date'] = date(config('date_format'), strtotime($quotation->created_at->toDateString()));
+                $nestedData['image'] = $quotation->image
+                    ? '<img src="' . asset('images/quotation/' . $quotation->image) . '" alt="Image" height="50">'
+                    : 'No Image';
+                $nestedData['document'] = $quotation->image
+                    ? '<img src="' . asset('images/quotation/' . $quotation->document) . '" alt="Image" height="50">'
+                    : 'No Image';
                 $nestedData['reference_no'] = $quotation->reference_no;
                 $nestedData['warehouse'] = $quotation->warehouse->name;
                 $nestedData['biller'] = $quotation->biller->name;
                 $nestedData['customer'] = $quotation->customer->name;
 
-                if($quotation->supplier_id) {
+                if ($quotation->supplier_id) {
                     $supplier = $quotation->supplier;
                     $nestedData['supplier'] = $supplier->name;
-                }
-                else {
+                } else {
                     $nestedData['supplier'] = 'N/A';
                 }
 
-                if($quotation->quotation_status == 1) {
-                    $nestedData['status'] = '<div class="badge badge-danger">'.trans('file.Pending').'</div>';
+                if ($quotation->quotation_status == 1) {
+                    $nestedData['status'] = '<div class="badge badge-danger">' . trans('file.Pending') . '</div>';
                     $status = trans('file.Pending');
-                }
-                else{
-                    $nestedData['status'] = '<div class="badge badge-success">'.trans('file.Sent').'</div>';
+                } else {
+                    $nestedData['status'] = '<div class="badge badge-success">' . trans('file.Sent') . '</div>';
                     $status = trans('file.Sent');
                 }
 
                 $nestedData['grand_total'] = number_format($quotation->grand_total, config('decimal'));
                 $nestedData['options'] = '<div class="btn-group">
-                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.trans("file.action").'
+                            <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' . trans("file.action") . '
                               <span class="caret"></span>
                               <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu edit-options dropdown-menu-right dropdown-default" user="menu">
                                 <li>
-                                    <button type="button" class="btn btn-link view"><i class="fa fa-eye"></i> '.trans('file.View').'</button>
+                                    <button type="button" class="btn btn-link view"><i class="fa fa-eye"></i> ' . trans('file.View') . '</button>
                                 </li>';
-                if(in_array("quotes-edit", $request['all_permission']))
+                if (in_array("quotes-edit", $request['all_permission']))
                     $nestedData['options'] .= '<li>
-                        <a href="'.route('quotations.edit', $quotation->id).'" class="btn btn-link"><i class="dripicons-document-edit"></i> '.trans('file.edit').'</a>
+                        <a href="' . route('quotations.edit', $quotation->id) . '" class="btn btn-link"><i class="dripicons-document-edit"></i> ' . trans('file.edit') . '</a>
                         </li>';
                 $nestedData['options'] .= '<li>
-                        <a href="'.route('quotation.create_sale', $quotation->id).'" class="btn btn-link"><i class="fa fa-shopping-cart"></i> '.trans('file.Create Sale').'</a>
+                        <a href="' . route('quotation.create_sale', $quotation->id) . '" class="btn btn-link"><i class="fa fa-shopping-cart"></i> ' . trans('file.Create Sale') . '</a>
                         </li>';
                 $nestedData['options'] .= '<li>
-                        <a href="'.route('quotation.create_purchase', $quotation->id).'" class="btn btn-link"><i class="fa fa-shopping-basket"></i> '.trans('file.Create Purchase').'</a>
+                        <a href="' . route('quotation.create_purchase', $quotation->id) . '" class="btn btn-link"><i class="fa fa-shopping-basket"></i> ' . trans('file.Create Purchase') . '</a>
                         </li>';
-                if(in_array("quotes-delete", $request['all_permission']))
-                    $nestedData['options'] .= \Form::open(["route" => ["quotations.destroy", $quotation->id], "method" => "DELETE"] ).'
+                if (in_array("quotes-delete", $request['all_permission']))
+                    $nestedData['options'] .= \Form::open(["route" => ["quotations.destroy", $quotation->id], "method" => "DELETE"]) . '
                             <li>
-                              <button type="submit" class="btn btn-link" onclick="return confirmDelete()"><i class="dripicons-trash"></i> '.trans("file.delete").'</button>
-                            </li>'.\Form::close().'
+                              <button type="submit" class="btn btn-link" onclick="return confirmDelete()"><i class="dripicons-trash"></i> ' . trans("file.delete") . '</button>
+                            </li>' . \Form::close() . '
                         </ul>
                     </div>';
 
                 // data for quotation details by one click
 
-                $nestedData['quotation'] = array( '[ "'.date(config('date_format'), strtotime($quotation->created_at->toDateString())).'"', ' "'.$quotation->reference_no.'"', ' "'.$status.'"',  ' "'.$quotation->biller->name.'"', ' "'.$quotation->biller->company_name.'"', ' "'.$quotation->biller->email.'"', ' "'.$quotation->biller->phone_number.'"', ' "'.$quotation->biller->address.'"', ' "'.$quotation->biller->city.'"', ' "'.$quotation->customer->name.'"', ' "'.$quotation->customer->phone_number.'"', ' "'.$quotation->customer->address.'"', ' "'.$quotation->customer->city.'"', ' "'.$quotation->id.'"', ' "'.$quotation->total_tax.'"', ' "'.$quotation->total_discount.'"', ' "'.$quotation->total_price.'"', ' "'.$quotation->order_tax.'"', ' "'.$quotation->order_tax_rate.'"', ' "'.$quotation->order_discount.'"', ' "'.$quotation->shipping_cost.'"', ' "'.$quotation->grand_total.'"', ' "'.preg_replace('/\s+/S', " ", $quotation->note).'"', ' "'.$quotation->user->name.'"', ' "'.$quotation->user->email.'"', ' "'.$quotation->document.'"]'
+                $nestedData['quotation'] = array(
+                    '[ "' . date(config('date_format'), strtotime($quotation->created_at->toDateString())) . '"',
+                    ' "' . $quotation->reference_no . '"',
+                    ' "' . $status . '"',
+                    ' "' . $quotation->biller->name . '"',
+                    ' "' . $quotation->biller->company_name . '"',
+                    ' "' . $quotation->biller->email . '"',
+                    ' "' . $quotation->biller->phone_number . '"',
+                    ' "' . $quotation->biller->address . '"',
+                    ' "' . $quotation->biller->city . '"',
+                    ' "' . $quotation->customer->name . '"',
+                    ' "' . $quotation->customer->phone_number . '"',
+                    ' "' . $quotation->customer->address . '"',
+                    ' "' . $quotation->customer->city . '"',
+                    ' "' . $quotation->id . '"',
+                    ' "' . $quotation->total_tax . '"',
+                    ' "' . $quotation->total_discount . '"',
+                    ' "' . $quotation->total_price . '"',
+                    ' "' . $quotation->order_tax . '"',
+                    ' "' . $quotation->order_tax_rate . '"',
+                    ' "' . $quotation->order_discount . '"',
+                    ' "' . $quotation->shipping_cost . '"',
+                    ' "' . $quotation->grand_total . '"',
+                    ' "' . preg_replace('/\s+/S', " ", $quotation->note) . '"',
+                    ' "' . $quotation->user->name . '"',
+                    ' "' . $quotation->user->email . '"',
+                    ' "' . $quotation->document . '"]',
+                    ' "<img src=\'' . asset('images/quotation/' . $quotation->image) . '\' alt=\'Image\' height=\'50\'>"',
+                    ' "<img src=\'' . asset('images/quotation/' . $quotation->document) . '\' alt=\'Image\' height=\'50\'>"',
+
                 );
                 $data[] = $nestedData;
             }
@@ -360,7 +385,7 @@ class QuotationController extends Controller
     public function create()
     {
         $role = Role::find(Auth::user()->role_id);
-        if($role->hasPermissionTo('quotes-add')){
+        if ($role->hasPermissionTo('quotes-add')) {
             $lims_biller_list = Biller::where('is_active', true)->get();
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             $lims_customer_list = Customer::where('is_active', true)->get();
@@ -368,8 +393,7 @@ class QuotationController extends Controller
             $lims_tax_list = Tax::where('is_active', true)->get();
 
             return view('backend.quotation.create', compact('lims_biller_list', 'lims_warehouse_list', 'lims_customer_list', 'lims_supplier_list', 'lims_tax_list'));
-        }
-        else
+        } else
             return redirect()->back()->with('not_permitted', 'Sorry! You are not allowed to access this module');
     }
 
@@ -378,8 +402,9 @@ class QuotationController extends Controller
         $data = $request->except('document');
         //return dd($data);
         $data['user_id'] = Auth::id();
+
         $document = $request->document;
-        if($document){
+        if ($document) {
             $v = Validator::make(
                 [
                     'extension' => strtolower($request->document->getClientOriginalExtension()),
@@ -392,19 +417,48 @@ class QuotationController extends Controller
                 return redirect()->back()->withErrors($v->errors());
             $ext = pathinfo($document->getClientOriginalName(), PATHINFO_EXTENSION);
             $documentName = date("Ymdhis");
-            if(!config('database.connections.saleprosaas_landlord')) {
+            if (!config('database.connections.saleprosaas_landlord')) {
                 $documentName = $documentName . '.' . $ext;
-                $document->move(public_path('documents/quotation'), $documentName);
-            }
-            else {
+                $document->move(public_path('images/quotation'), $documentName);
+            } else {
                 $documentName = $this->getTenantId() . '_' . $documentName . '.' . $ext;
-                $document->move(public_path('documents/quotation'), $documentName);
+                $document->move(public_path('images/quotation'), $documentName);
             }
             $data['document'] = $documentName;
         }
-        $data['reference_no'] = 'qr-' . date("Ymd") . '-'. date("his");
+
+        $image = $request->image;
+        if ($image) {
+            $v = Validator::make(
+                [
+                    'extension' => strtolower($image->getClientOriginalExtension()),
+                ],
+                [
+                    'extension' => 'in:jpg,jpeg,png,gif',
+                ]
+            );
+
+            if ($v->fails()) {
+                return redirect()->back()->withErrors($v->errors());
+            }
+
+            $ext = pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
+            $imageName = date("Ymdhis");
+
+            if (!config('database.connections.saleprosaas_landlord')) {
+                $imageName = $imageName . '.' . $ext;
+                $image->move(public_path('images/quotation'), $imageName);
+            } else {
+                $imageName = $this->getTenantId() . '_' . $imageName . '.' . $ext;
+                $image->move(public_path('images/quotation'), $imageName);
+            }
+
+            $data['image'] = $imageName;
+        }
+
+        $data['reference_no'] = 'qr-' . date("Ymd") . '-' . date("his");
         $lims_quotation_data = Quotation::create($data);
-        if($lims_quotation_data->quotation_status == 2){
+        if ($lims_quotation_data->quotation_status == 2) {
             //collecting mail data
             $lims_customer_data = Customer::find($data['customer_id']);
             $mail_data['email'] = $lims_customer_data->email;
@@ -430,30 +484,27 @@ class QuotationController extends Controller
         $product_quotation = [];
 
         foreach ($product_id as $i => $id) {
-            if($sale_unit[$i] != 'n/a'){
+            if ($sale_unit[$i] != 'n/a') {
                 $lims_sale_unit_data = Unit::where('unit_name', $sale_unit[$i])->first();
                 $sale_unit_id = $lims_sale_unit_data->id;
-            }
-            else
+            } else
                 $sale_unit_id = 0;
-            if($sale_unit_id)
+            if ($sale_unit_id)
                 $mail_data['unit'][$i] = $lims_sale_unit_data->unit_code;
             else
                 $mail_data['unit'][$i] = '';
             $lims_product_data = Product::find($id);
-            if($lims_product_data->is_variant) {
+            if ($lims_product_data->is_variant) {
                 $lims_product_variant_data = ProductVariant::select('variant_id')->FindExactProductWithCode($id, $product_code[$i])->first();
                 $product_quotation['variant_id'] = $lims_product_variant_data->variant_id;
-            }
-            else
+            } else
                 $product_quotation['variant_id'] = null;
-            if($product_quotation['variant_id']){
+            if ($product_quotation['variant_id']) {
                 $variant_data = Variant::find($product_quotation['variant_id']);
-                $mail_data['products'][$i] = $lims_product_data->name . ' [' . $variant_data->name .']';
-            }
-            else
+                $mail_data['products'][$i] = $lims_product_data->name . ' [' . $variant_data->name . ']';
+            } else
                 $mail_data['products'][$i] = $lims_product_data->name;
-            $product_quotation['quotation_id'] = $lims_quotation_data->id ;
+            $product_quotation['quotation_id'] = $lims_quotation_data->id;
             $product_quotation['product_id'] = $id;
             $product_quotation['product_batch_id'] = $product_batch_id[$i];
             $product_quotation['qty'] = $mail_data['qty'][$i] = $qty[$i];
@@ -467,12 +518,11 @@ class QuotationController extends Controller
         }
         $message = 'Quotation created successfully';
         $mail_setting = MailSetting::latest()->first();
-        if($lims_quotation_data->quotation_status == 2 && $mail_data['email'] && $mail_setting) {
+        if ($lims_quotation_data->quotation_status == 2 && $mail_data['email'] && $mail_setting) {
             $this->setMailInfo($mail_setting);
-            try{
+            try {
                 Mail::to($mail_data['email'])->send(new QuotationDetails($mail_data));
-            }
-            catch(\Exception $e){
+            } catch (\Exception $e) {
                 $message = 'Quotation created successfully. Please setup your <a href="setting/mail_setting">mail setting</a> to send mail.';
             }
         }
@@ -487,12 +537,11 @@ class QuotationController extends Controller
         $lims_customer_data = Customer::find($lims_quotation_data->customer_id);
         $mail_setting = MailSetting::latest()->first();
 
-        if(!$mail_setting) {
+        if (!$mail_setting) {
             $message = 'Please setup your <a href="setting/mail_setting">mail setting</a> to send mail.';
-        }else if(!$lims_customer_data->email) {
+        } else if (!$lims_customer_data->email) {
             $message = 'Customer doesnt have email!';
-        }
-        else if($lims_customer_data->email && $mail_setting) {
+        } else if ($lims_customer_data->email && $mail_setting) {
             //collecting male data
             $mail_data['email'] = $lims_customer_data->email;
             $mail_data['reference_no'] = $lims_quotation_data->reference_no;
@@ -506,28 +555,25 @@ class QuotationController extends Controller
 
             foreach ($lims_product_quotation_data as $key => $product_quotation_data) {
                 $lims_product_data = Product::find($product_quotation_data->product_id);
-                if($product_quotation_data->variant_id) {
+                if ($product_quotation_data->variant_id) {
                     $variant_data = Variant::find($product_quotation_data->variant_id);
                     $mail_data['products'][$key] = $lims_product_data->name . ' [' . $variant_data->name . ']';
-                }
-                else
+                } else
                     $mail_data['products'][$key] = $lims_product_data->name;
-                if($product_quotation_data->sale_unit_id){
+                if ($product_quotation_data->sale_unit_id) {
                     $lims_unit_data = Unit::find($product_quotation_data->sale_unit_id);
                     $mail_data['unit'][$key] = $lims_unit_data->unit_code;
-                }
-                else
+                } else
                     $mail_data['unit'][$key] = '';
 
                 $mail_data['qty'][$key] = $product_quotation_data->qty;
                 $mail_data['total'][$key] = $product_quotation_data->total;
             }
             $this->setMailInfo($mail_setting);
-            try{
+            try {
                 Mail::to($mail_data['email'])->send(new QuotationDetails($mail_data));
                 $message = 'Mail sent successfully';
-            }
-            catch(\Exception $e){
+            } catch (\Exception $e) {
                 $message = 'Please setup your <a href="setting/mail_setting">mail setting</a> to send mail.';
             }
         }
@@ -537,9 +583,9 @@ class QuotationController extends Controller
 
     public function getCustomerGroup($id)
     {
-         $lims_customer_data = Customer::find($id);
-         $lims_customer_group_data = CustomerGroup::find($lims_customer_data->customer_group_id);
-         return $lims_customer_group_data->percentage;
+        $lims_customer_data = Customer::find($id);
+        $lims_customer_group_data = CustomerGroup::find($lims_customer_data->customer_group_id);
+        return $lims_customer_group_data->percentage;
     }
 
     public function getProduct($id)
@@ -557,17 +603,16 @@ class QuotationController extends Controller
 
         //retrieve data of product without variant
         $lims_product_warehouse_data = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
-        ->where([
-            ['products.is_active', true],
-            ['product_warehouse.warehouse_id', $id],
-        ])
-        ->whereNull('product_warehouse.variant_id')
-        ->whereNull('product_warehouse.product_batch_id')
-        ->select('product_warehouse.*')
-        ->get();
+            ->where([
+                ['products.is_active', true],
+                ['product_warehouse.warehouse_id', $id],
+            ])
+            ->whereNull('product_warehouse.variant_id')
+            ->whereNull('product_warehouse.product_batch_id')
+            ->select('product_warehouse.*')
+            ->get();
 
-        foreach ($lims_product_warehouse_data as $product_warehouse)
-        {
+        foreach ($lims_product_warehouse_data as $product_warehouse) {
             $product_qty[] = $product_warehouse->qty;
             $product_price[] = $product_warehouse->price;
             $lims_product_data = Product::find($product_warehouse->product_id);
@@ -580,7 +625,7 @@ class QuotationController extends Controller
             $batch_no[] = null;
             $product_batch_id[] = null;
             $expired_date[] = null;
-            if($product_warehouse->is_embeded)
+            if ($product_warehouse->is_embeded)
                 $is_embeded[] = $product_warehouse->is_embeded;
             else
                 $is_embeded[] = 0;
@@ -588,38 +633,37 @@ class QuotationController extends Controller
         }
 
         $lims_product_with_imei_warehouse_data = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
-        ->where([
-            ['products.is_active', true],
-            ['products.is_imei', true],
-            ['product_warehouse.warehouse_id', $id],
-            ['product_warehouse.qty', '>', 0]
-        ])
-        ->whereNull('product_warehouse.variant_id')
-        ->whereNotNull('product_warehouse.imei_number')
-        ->select('product_warehouse.*', 'products.is_embeded')
-        ->groupBy('product_warehouse.product_id')
-        ->get();
+            ->where([
+                ['products.is_active', true],
+                ['products.is_imei', true],
+                ['product_warehouse.warehouse_id', $id],
+                ['product_warehouse.qty', '>', 0]
+            ])
+            ->whereNull('product_warehouse.variant_id')
+            ->whereNotNull('product_warehouse.imei_number')
+            ->select('product_warehouse.*', 'products.is_embeded')
+            ->groupBy('product_warehouse.product_id')
+            ->get();
 
         config()->set('database.connections.mysql.strict', false);
         \DB::reconnect(); //important as the existing connection if any would be in strict mode
 
         $lims_product_with_batch_warehouse_data = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
-        ->where([
-            ['products.is_active', true],
-            ['product_warehouse.warehouse_id', $id],
-        ])
-        ->whereNull('product_warehouse.variant_id')
-        ->whereNotNull('product_warehouse.product_batch_id')
-        ->select('product_warehouse.*')
-        ->groupBy('product_warehouse.product_id')
-        ->get();
+            ->where([
+                ['products.is_active', true],
+                ['product_warehouse.warehouse_id', $id],
+            ])
+            ->whereNull('product_warehouse.variant_id')
+            ->whereNotNull('product_warehouse.product_batch_id')
+            ->select('product_warehouse.*')
+            ->groupBy('product_warehouse.product_id')
+            ->get();
 
         //now changing back the strict ON
         config()->set('database.connections.mysql.strict', true);
         \DB::reconnect();
 
-        foreach ($lims_product_with_batch_warehouse_data as $product_warehouse)
-        {
+        foreach ($lims_product_with_batch_warehouse_data as $product_warehouse) {
             $product_qty[] = $product_warehouse->qty;
             $product_price[] = $product_warehouse->price;
             $lims_product_data = Product::find($product_warehouse->product_id);
@@ -633,46 +677,44 @@ class QuotationController extends Controller
             $batch_no[] = $product_batch_data->batch_no;
             $product_batch_id[] = $product_batch_data->id;
             $expired_date[] = null;
-            if($product_warehouse->is_embeded)
+            if ($product_warehouse->is_embeded)
                 $is_embeded[] = $product_warehouse->is_embeded;
             else
                 $is_embeded[] = 0;
             $imei_number[] = null;
         }
 
-          //product with imei
-          foreach ($lims_product_with_imei_warehouse_data as $product_warehouse)
-          {
-              $imei_numbers = explode(",", $product_warehouse->imei_number);
-              foreach ($imei_numbers as $key => $number) {
-                  $product_qty[] = $product_warehouse->qty;
-                  $product_price[] = $product_warehouse->price;
-                  $lims_product_data = Product::find($product_warehouse->product_id);
-                  $product_code[] =  $lims_product_data->code;
-                  $product_name[] = htmlspecialchars($lims_product_data->name);
-                  $product_type[] = $lims_product_data->type;
-                  $product_id[] = $lims_product_data->id;
-                  $product_list[] = $lims_product_data->product_list;
-                  $qty_list[] = $lims_product_data->qty_list;
-                  $batch_no[] = null;
-                  $product_batch_id[] = null;
-                  $expired_date[] = null;
-                  $is_embeded[] = 0;
-                  $imei_number[] = $number;
-              }
-          }
+        //product with imei
+        foreach ($lims_product_with_imei_warehouse_data as $product_warehouse) {
+            $imei_numbers = explode(",", $product_warehouse->imei_number);
+            foreach ($imei_numbers as $key => $number) {
+                $product_qty[] = $product_warehouse->qty;
+                $product_price[] = $product_warehouse->price;
+                $lims_product_data = Product::find($product_warehouse->product_id);
+                $product_code[] =  $lims_product_data->code;
+                $product_name[] = htmlspecialchars($lims_product_data->name);
+                $product_type[] = $lims_product_data->type;
+                $product_id[] = $lims_product_data->id;
+                $product_list[] = $lims_product_data->product_list;
+                $qty_list[] = $lims_product_data->qty_list;
+                $batch_no[] = null;
+                $product_batch_id[] = null;
+                $expired_date[] = null;
+                $is_embeded[] = 0;
+                $imei_number[] = $number;
+            }
+        }
 
         //retrieve data of product with variant
         $lims_product_warehouse_data = Product::join('product_warehouse', 'products.id', '=', 'product_warehouse.product_id')
-        ->where([
-            ['products.is_active', true],
-            ['product_warehouse.warehouse_id', $id],
-        ])->whereNotNull('product_warehouse.variant_id')->select('product_warehouse.*')->get();
-        foreach ($lims_product_warehouse_data as $product_warehouse)
-        {
+            ->where([
+                ['products.is_active', true],
+                ['product_warehouse.warehouse_id', $id],
+            ])->whereNotNull('product_warehouse.variant_id')->select('product_warehouse.*')->get();
+        foreach ($lims_product_warehouse_data as $product_warehouse) {
             $lims_product_data = Product::find($product_warehouse->product_id);
             $lims_product_variant_data = ProductVariant::select('item_code')->FindExactProduct($product_warehouse->product_id, $product_warehouse->variant_id)->first();
-            if($lims_product_variant_data) {
+            if ($lims_product_variant_data) {
                 $product_qty[] = $product_warehouse->qty;
                 $product_code[] =  $lims_product_variant_data->item_code;
                 $product_name[] = $lims_product_data->name;
@@ -684,7 +726,7 @@ class QuotationController extends Controller
                 $product_batch_id[] = null;
             }
             $expired_date[] = null;
-            if($product_warehouse->is_embeded)
+            if ($product_warehouse->is_embeded)
                 $is_embeded[] = $product_warehouse->is_embeded;
             else
                 $is_embeded[] = 0;
@@ -692,8 +734,7 @@ class QuotationController extends Controller
         }
         //retrieve product data of digital and combo
         $lims_product_data = Product::whereNotIn('type', ['standard'])->where('is_active', true)->get();
-        foreach ($lims_product_data as $product)
-        {
+        foreach ($lims_product_data as $product) {
             $product_qty[] = $product->qty;
             $product_code[] =  $product->code;
             $product_name[] = $product->name;
@@ -727,34 +768,33 @@ class QuotationController extends Controller
         //     $product_code[0] = rtrim($product_code[0], " ");
         //     $qty = $product_info[2];
         // }
-        if($product_data[3][0]) {
+        if ($product_data[3][0]) {
             $product_info = explode("|", $request['data']);
             $embeded_code = $product_data[0];
             $product_data[0] = substr($embeded_code, 0, 7);
             $qty = substr($embeded_code, 7, 5) / 1000;
-        }
-        else {
+        } else {
             $qty = $product_info[2];
         }
         $product_variant_id = null;
         $all_discount = DB::table('discount_plan_customers')
-                        ->join('discount_plans', 'discount_plans.id', '=', 'discount_plan_customers.discount_plan_id')
-                        ->join('discount_plan_discounts', 'discount_plans.id', '=', 'discount_plan_discounts.discount_plan_id')
-                        ->join('discounts', 'discounts.id', '=', 'discount_plan_discounts.discount_id')
-                        ->where([
-                            ['discount_plans.is_active', true],
-                            ['discounts.is_active', true],
-                            ['discount_plan_customers.customer_id', $customer_id]
-                        ])
-                        ->select('discounts.*')
-                        ->get();
+            ->join('discount_plans', 'discount_plans.id', '=', 'discount_plan_customers.discount_plan_id')
+            ->join('discount_plan_discounts', 'discount_plans.id', '=', 'discount_plan_discounts.discount_plan_id')
+            ->join('discounts', 'discounts.id', '=', 'discount_plan_discounts.discount_id')
+            ->where([
+                ['discount_plans.is_active', true],
+                ['discounts.is_active', true],
+                ['discount_plan_customers.customer_id', $customer_id]
+            ])
+            ->select('discounts.*')
+            ->get();
         // return $product_data[0];
         $lims_product_data = Product::where([
             ['code', $product_data[0]],
             ['is_active', true]
         ])->first();
 
-        if(!$lims_product_data) {
+        if (!$lims_product_data) {
             $lims_product_data = Product::join('product_variants', 'products.id', 'product_variants.product_id')
                 ->select('products.*', 'product_variants.id as product_variant_id', 'product_variants.item_code', 'product_variants.additional_price')
                 ->where([
@@ -767,11 +807,10 @@ class QuotationController extends Controller
         }
 
         $product[] = $lims_product_data->name;
-        if($lims_product_data->is_variant){
+        if ($lims_product_data->is_variant) {
             $product[] = $lims_product_data->item_code;
             $lims_product_data->price += $lims_product_data->additional_price;
-        }
-        else
+        } else
             $product[] = $lims_product_data->code;
 
         $no_discount = 1;
@@ -779,64 +818,58 @@ class QuotationController extends Controller
             $product_list = explode(",", $discount->product_list);
             $days = explode(",", $discount->days);
 
-            if( ( $discount->applicable_for == 'All' || in_array($lims_product_data->id, $product_list) ) && ( $todayDate >= $discount->valid_from && $todayDate <= $discount->valid_till && in_array(date('D'), $days) && $qty >= $discount->minimum_qty && $qty <= $discount->maximum_qty ) ) {
-                if($discount->type == 'flat') {
+            if (($discount->applicable_for == 'All' || in_array($lims_product_data->id, $product_list)) && ($todayDate >= $discount->valid_from && $todayDate <= $discount->valid_till && in_array(date('D'), $days) && $qty >= $discount->minimum_qty && $qty <= $discount->maximum_qty)) {
+                if ($discount->type == 'flat') {
                     $product[] = $lims_product_data->price - $discount->value;
-                }
-                elseif($discount->type == 'percentage') {
-                    $product[] = $lims_product_data->price - ($lims_product_data->price * ($discount->value/100));
+                } elseif ($discount->type == 'percentage') {
+                    $product[] = $lims_product_data->price - ($lims_product_data->price * ($discount->value / 100));
                 }
                 $no_discount = 0;
                 break;
-            }
-            else {
+            } else {
                 continue;
             }
         }
 
-        if($lims_product_data->promotion && $todayDate <= $lims_product_data->last_date && $no_discount) {
+        if ($lims_product_data->promotion && $todayDate <= $lims_product_data->last_date && $no_discount) {
             $product[] = $lims_product_data->promotion_price;
-        }
-        elseif($no_discount)
+        } elseif ($no_discount)
             $product[] = $lims_product_data->price;
 
-        if($lims_product_data->tax_id) {
+        if ($lims_product_data->tax_id) {
             $lims_tax_data = Tax::find($lims_product_data->tax_id);
             $product[] = $lims_tax_data->rate;
             $product[] = $lims_tax_data->name;
-        }
-        else{
+        } else {
             $product[] = 0;
             $product[] = 'No Tax';
         }
         $product[] = $lims_product_data->tax_method;
-        if($lims_product_data->type == 'standard'){
+        if ($lims_product_data->type == 'standard') {
             $units = Unit::where("base_unit", $lims_product_data->unit_id)
-                    ->orWhere('id', $lims_product_data->unit_id)
-                    ->get();
+                ->orWhere('id', $lims_product_data->unit_id)
+                ->get();
             $unit_name = array();
             $unit_operator = array();
             $unit_operation_value = array();
             foreach ($units as $unit) {
-                if($lims_product_data->sale_unit_id == $unit->id) {
+                if ($lims_product_data->sale_unit_id == $unit->id) {
                     array_unshift($unit_name, $unit->unit_name);
                     array_unshift($unit_operator, $unit->operator);
                     array_unshift($unit_operation_value, $unit->operation_value);
-                }
-                else {
+                } else {
                     $unit_name[]  = $unit->unit_name;
                     $unit_operator[] = $unit->operator;
                     $unit_operation_value[] = $unit->operation_value;
                 }
             }
-            $product[] = implode(",",$unit_name) . ',';
-            $product[] = implode(",",$unit_operator) . ',';
-            $product[] = implode(",",$unit_operation_value) . ',';
-        }
-        else{
-            $product[] = 'n/a'. ',';
-            $product[] = 'n/a'. ',';
-            $product[] = 'n/a'. ',';
+            $product[] = implode(",", $unit_name) . ',';
+            $product[] = implode(",", $unit_operator) . ',';
+            $product[] = implode(",", $unit_operation_value) . ',';
+        } else {
+            $product[] = 'n/a' . ',';
+            $product[] = 'n/a' . ',';
+            $product[] = 'n/a' . ',';
         }
         $product[] = $lims_product_data->id;
         $product[] = $product_variant_id;
@@ -857,15 +890,14 @@ class QuotationController extends Controller
         $lims_product_quotation_data = ProductQuotation::where('quotation_id', $id)->get();
         foreach ($lims_product_quotation_data as $key => $product_quotation_data) {
             $product = Product::find($product_quotation_data->product_id);
-            if($product_quotation_data->variant_id) {
+            if ($product_quotation_data->variant_id) {
                 $lims_product_variant_data = ProductVariant::select('item_code')->FindExactProduct($product_quotation_data->product_id, $product_quotation_data->variant_id)->first();
                 $product->code = $lims_product_variant_data->item_code;
             }
-            if($product_quotation_data->sale_unit_id){
+            if ($product_quotation_data->sale_unit_id) {
                 $unit_data = Unit::find($product_quotation_data->sale_unit_id);
                 $unit = $unit_data->unit_code;
-            }
-            else
+            } else
                 $unit = '';
 
             $product_quotation[0][$key] = $product->name . ' [' . $product->code . ']';
@@ -875,11 +907,10 @@ class QuotationController extends Controller
             $product_quotation[4][$key] = $product_quotation_data->tax_rate;
             $product_quotation[5][$key] = $product_quotation_data->discount;
             $product_quotation[6][$key] = $product_quotation_data->total;
-            if($product_quotation_data->product_batch_id) {
+            if ($product_quotation_data->product_batch_id) {
                 $product_batch_data = ProductBatch::select('batch_no')->find($product_quotation_data->product_batch_id);
                 $product_quotation[7][$key] = $product_batch_data->batch_no;
-            }
-            else
+            } else
                 $product_quotation[7][$key] = 'N/A';
         }
         return $product_quotation;
@@ -888,7 +919,7 @@ class QuotationController extends Controller
     public function edit($id)
     {
         $role = Role::find(Auth::user()->role_id);
-        if($role->hasPermissionTo('quotes-edit')){
+        if ($role->hasPermissionTo('quotes-edit')) {
             $lims_customer_list = Customer::where('is_active', true)->get();
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             $lims_biller_list = Biller::where('is_active', true)->get();
@@ -896,9 +927,8 @@ class QuotationController extends Controller
             $lims_tax_list = Tax::where('is_active', true)->get();
             $lims_quotation_data = Quotation::find($id);
             $lims_product_quotation_data = ProductQuotation::where('quotation_id', $id)->get();
-            return view('backend.quotation.edit',compact('lims_customer_list', 'lims_warehouse_list', 'lims_biller_list', 'lims_tax_list', 'lims_quotation_data','lims_product_quotation_data', 'lims_supplier_list'));
-        }
-        else
+            return view('backend.quotation.edit', compact('lims_customer_list', 'lims_warehouse_list', 'lims_biller_list', 'lims_tax_list', 'lims_quotation_data', 'lims_product_quotation_data', 'lims_supplier_list'));
+        } else
             return redirect()->back()->with('not_permitted', 'Sorry! You are not allowed to access this module');
     }
 
@@ -909,7 +939,7 @@ class QuotationController extends Controller
         $document = $request->document;
         $lims_quotation_data = Quotation::find($id);
 
-        if($document) {
+        if ($document) {
             $v = Validator::make(
                 [
                     'extension' => strtolower($request->document->getClientOriginalExtension()),
@@ -921,24 +951,54 @@ class QuotationController extends Controller
             if ($v->fails())
                 return redirect()->back()->withErrors($v->errors());
 
-            $this->fileDelete(public_path('documents/quotation/'), $lims_quotation_data->document);
+            $this->fileDelete(public_path('images/quotation/'), $lims_quotation_data->document);
 
             $ext = pathinfo($document->getClientOriginalName(), PATHINFO_EXTENSION);
             $documentName = date("Ymdhis");
-            if(!config('database.connections.saleprosaas_landlord')) {
+            if (!config('database.connections.saleprosaas_landlord')) {
                 $documentName = $documentName . '.' . $ext;
-                $document->move(public_path('documents/quotation'), $documentName);
-            }
-            else {
+                $document->move(public_path('images/quotation'), $documentName);
+            } else {
                 $documentName = $this->getTenantId() . '_' . $documentName . '.' . $ext;
-                $document->move(public_path('documents/quotation'), $documentName);
+                $document->move(public_path('images/quotation'), $documentName);
             }
             $data['document'] = $documentName;
         }
+
+        $image = $request->image;
+
+        if ($image) {
+            $v = Validator::make(
+                [
+                    'extension' => strtolower($image->getClientOriginalExtension()),
+                ],
+                [
+                    'extension' => 'in:jpg,jpeg,png,gif',
+                ]
+            );
+
+            if ($v->fails()) {
+                return redirect()->back()->withErrors($v->errors());
+            }
+
+            $ext = pathinfo($image->getClientOriginalName(), PATHINFO_EXTENSION);
+            $imageName = date("Ymdhis");
+
+            if (!config('database.connections.saleprosaas_landlord')) {
+                $imageName = $imageName . '.' . $ext;
+                $image->move(public_path('images/quotation'), $imageName);
+            } else {
+                $imageName = $this->getTenantId() . '_' . $imageName . '.' . $ext;
+                $image->move(public_path('images/quotation'), $imageName);
+            }
+
+            $data['image'] = $imageName;
+        }
+
         $lims_product_quotation_data = ProductQuotation::where('quotation_id', $id)->get();
         //update quotation table
         $lims_quotation_data->update($data);
-        if($lims_quotation_data->quotation_status == 2){
+        if ($lims_quotation_data->quotation_status == 2) {
             //collecting mail data
             $lims_customer_data = Customer::find($data['customer_id']);
             $mail_data['email'] = $lims_customer_data->email;
@@ -965,28 +1025,26 @@ class QuotationController extends Controller
         foreach ($lims_product_quotation_data as $key => $product_quotation_data) {
             $old_product_id[] = $product_quotation_data->product_id;
             $lims_product_data = Product::select('id')->find($product_quotation_data->product_id);
-            if($product_quotation_data->variant_id) {
+            if ($product_quotation_data->variant_id) {
                 $lims_product_variant_data = ProductVariant::select('id')->FindExactProduct($product_quotation_data->product_id, $product_quotation_data->variant_id)->first();
                 $old_product_variant_id[] = $lims_product_variant_data->id;
-                if(!in_array($lims_product_variant_data->id, $product_variant_id))
+                if (!in_array($lims_product_variant_data->id, $product_variant_id))
                     $product_quotation_data->delete();
-            }
-            else {
+            } else {
                 $old_product_variant_id[] = null;
-                if(!in_array($product_quotation_data->product_id, $product_id))
+                if (!in_array($product_quotation_data->product_id, $product_id))
                     $product_quotation_data->delete();
             }
         }
 
         foreach ($product_id as $i => $pro_id) {
-            if($sale_unit[$i] != 'n/a'){
+            if ($sale_unit[$i] != 'n/a') {
                 $lims_sale_unit_data = Unit::where('unit_name', $sale_unit[$i])->first();
                 $sale_unit_id = $lims_sale_unit_data->id;
-            }
-            else
+            } else
                 $sale_unit_id = 0;
             $lims_product_data = Product::select('id', 'name', 'is_variant')->find($pro_id);
-            if($sale_unit_id)
+            if ($sale_unit_id)
                 $mail_data['unit'][$i] = $lims_sale_unit_data->unit_code;
             else
                 $mail_data['unit'][$i] = '';
@@ -1001,31 +1059,28 @@ class QuotationController extends Controller
             $input['tax'] = $tax[$i];
             $input['total'] = $mail_data['total'][$i] = $total[$i];
             $flag = 1;
-            if($lims_product_data->is_variant) {
+            if ($lims_product_data->is_variant) {
                 $lims_product_variant_data = ProductVariant::select('variant_id')->where('id', $product_variant_id[$i])->first();
                 $input['variant_id'] = $lims_product_variant_data->variant_id;
-                if(in_array($product_variant_id[$i], $old_product_variant_id)) {
+                if (in_array($product_variant_id[$i], $old_product_variant_id)) {
                     ProductQuotation::where([
                         ['product_id', $pro_id],
                         ['variant_id', $input['variant_id']],
                         ['quotation_id', $id]
                     ])->update($input);
-                }
-                else {
+                } else {
                     ProductQuotation::create($input);
                 }
                 $variant_data = Variant::find($input['variant_id']);
                 $mail_data['products'][$i] = $lims_product_data->name . ' [' . $variant_data->name . ']';
-            }
-            else {
+            } else {
                 $input['variant_id'] = null;
-                if(in_array($pro_id, $old_product_id)) {
+                if (in_array($pro_id, $old_product_id)) {
                     ProductQuotation::where([
                         ['product_id', $pro_id],
                         ['quotation_id', $id]
                     ])->update($input);
-                }
-                else {
+                } else {
                     ProductQuotation::create($input);
                 }
                 $mail_data['products'][$i] = $lims_product_data->name;
@@ -1034,12 +1089,11 @@ class QuotationController extends Controller
 
         $message = 'Quotation updated successfully';
         $mail_setting = MailSetting::latest()->first();
-        if($lims_quotation_data->quotation_status == 2 && $mail_data['email'] && $mail_setting) {
+        if ($lims_quotation_data->quotation_status == 2 && $mail_data['email'] && $mail_setting) {
             $this->setMailInfo($mail_setting);
-            try{
+            try {
                 Mail::to($mail_data['email'])->send(new QuotationDetails($mail_data));
-            }
-            catch(\Exception $e){
+            } catch (\Exception $e) {
                 $message = 'Quotation updated successfully. Please setup your <a href="setting/mail_setting">mail setting</a> to send mail.';
             }
         }
@@ -1054,8 +1108,9 @@ class QuotationController extends Controller
         $lims_tax_list = Tax::where('is_active', true)->get();
         $lims_quotation_data = Quotation::find($id);
         $lims_product_quotation_data = ProductQuotation::where('quotation_id', $id)->get();
+
         $lims_pos_setting_data = PosSetting::latest()->first();
-        return view('backend.quotation.create_sale',compact('lims_customer_list', 'lims_warehouse_list', 'lims_biller_list', 'lims_tax_list', 'lims_quotation_data','lims_product_quotation_data', 'lims_pos_setting_data'));
+        return view('backend.quotation.create_sale', compact('lims_customer_list', 'lims_warehouse_list', 'lims_biller_list', 'lims_tax_list', 'lims_quotation_data', 'lims_product_quotation_data', 'lims_pos_setting_data'));
     }
 
     public function createPurchase($id)
@@ -1068,22 +1123,22 @@ class QuotationController extends Controller
         $lims_product_list_without_variant = $this->productWithoutVariant();
         $lims_product_list_with_variant = $this->productWithVariant();
 
-        return view('backend.quotation.create_purchase',compact('lims_product_list_without_variant', 'lims_product_list_with_variant', 'lims_supplier_list', 'lims_warehouse_list', 'lims_tax_list', 'lims_quotation_data','lims_product_quotation_data'));
+        return view('backend.quotation.create_purchase', compact('lims_product_list_without_variant', 'lims_product_list_with_variant', 'lims_supplier_list', 'lims_warehouse_list', 'lims_tax_list', 'lims_quotation_data', 'lims_product_quotation_data'));
     }
 
     public function productWithoutVariant()
     {
         return Product::ActiveStandard()->select('id', 'name', 'code')
-                ->whereNull('is_variant')->get();
+            ->whereNull('is_variant')->get();
     }
 
     public function productWithVariant()
     {
         return Product::join('product_variants', 'products.id', 'product_variants.product_id')
-                ->ActiveStandard()
-                ->whereNotNull('is_variant')
-                ->select('products.id', 'products.name', 'product_variants.item_code')
-                ->orderBy('position')->get();
+            ->ActiveStandard()
+            ->whereNotNull('is_variant')
+            ->select('products.id', 'products.name', 'product_variants.item_code')
+            ->orderBy('position')->get();
     }
 
     public function deleteBySelection(Request $request)

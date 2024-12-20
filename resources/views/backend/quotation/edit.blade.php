@@ -218,6 +218,28 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="container-fluid">
+                                    <table class="table table-bordered table-condensed totals">
+                                        <td><strong>{{trans('file.Items')}}</strong>
+                                            <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Total')}}</strong>
+                                            <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Tax')}}</strong>
+                                            <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Discount')}}</strong>
+                                            <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Shipping Cost')}}</strong>
+                                            <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.grand total')}}</strong>
+                                            <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                    </table>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div class="form-group">
@@ -284,16 +306,47 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{trans('file.Attach Document')}}</label>
-                                            <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
+                                            <label>{{ trans('file.Attach Document') }}</label>
+                                            <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx, and txt file is supported"></i>
                                             <input type="file" name="document" class="form-control" />
+
                                             @if($errors->has('extension'))
                                                 <span>
-                                                   <strong>{{ $errors->first('extension') }}</strong>
+                                                    <strong>{{ $errors->first('extension') }}</strong>
                                                 </span>
+                                            @endif
+
+                                            <!-- Hiển thị tài liệu hiện tại (nếu có) -->
+                                            @if(isset($lims_quotation_data->document) && $lims_quotation_data->document)
+                                                <div>
+                                                    <img src="{{ asset('/images/quotation/' . $lims_quotation_data->document) }}" alt="Hình ảnh" width="100%"/>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{ trans('file.Image') }}</label>
+                                            <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx, and txt file is supported"></i>
+                                            <input type="file" name="image" class="form-control" />
+
+                                            @if($errors->has('extension'))
+                                                <span>
+                                                    <strong>{{ $errors->first('extension') }}</strong>
+                                                </span>
+                                            @endif
+
+                                            <!-- Hiển thị hình ảnh hiện tại (nếu có) -->
+                                            @if(isset($lims_quotation_data->image) && $lims_quotation_data->image)
+                                            <div>
+                                                <img src="{{ asset('/images/quotation/' . $lims_quotation_data->image) }}" alt="Hình ảnh" width="100%"/>
+                                            </div>
+                                        @endif
+
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{trans('file.Status')}} *</label>
@@ -324,28 +377,7 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid">
-        <table class="table table-bordered table-condensed totals">
-            <td><strong>{{trans('file.Items')}}</strong>
-                <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Total')}}</strong>
-                <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Order Tax')}}</strong>
-                <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Order Discount')}}</strong>
-                <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Shipping Cost')}}</strong>
-                <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.grand total')}}</strong>
-                <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-        </table>
-    </div>
+
     <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
         <div role="document" class="modal-dialog">
             <div class="modal-content">

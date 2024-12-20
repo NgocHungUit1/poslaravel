@@ -31,7 +31,7 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{trans('file.Date')}}</label>
-                                            <input type="text" name="created_at" class="form-control date" placeholder="Choose date"/>
+                                            <input type="text" name="created_at" class="form-control date" placeholder="Choose date" id="created_at"/>
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -89,18 +89,19 @@
                                     </div>
                                     @if(isset(auth()->user()->warehouse_id))
                                     <input type="hidden" name="warehouse_id" id="warehouse_id" value="{{auth()->user()->warehouse_id}}" />
-                                    @else
+                                @else
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{trans('file.Warehouse')}} *</label>
                                             <select required name="warehouse_id" id="warehouse_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select warehouse...">
-                                                @foreach($lims_warehouse_list as $warehouse)
-                                                <option value="{{$warehouse->id}}">{{$warehouse->name}}</option>
+                                                @foreach($lims_warehouse_list as $key => $warehouse)
+                                                    <option value="{{$warehouse->id}}" {{ $loop->first ? 'selected' : '' }}>{{$warehouse->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
-                                    @endif
+                                @endif
+
                                     @if(isset(auth()->user()->biller_id))
                                     <input type="hidden" name="biller_id" id="biller_id" value="{{auth()->user()->biller_id}}" />
                                     @else
@@ -120,22 +121,15 @@
                                             <label>{{trans('file.Currency')}} *</label>
                                             <select name="currency_id" id="currency" class="form-control selectpicker" data-toggle="tooltip" title="" data-original-title="Sale currency">
                                                 @foreach($currency_list as $currency_data)
-                                                <option value="{{$currency_data->id}}" data-rate="{{$currency_data->exchange_rate}}">{{$currency_data->code}}</option>
+                                                    <option value="{{$currency_data->id}}" data-rate="{{$currency_data->exchange_rate}}" {{ $currency_data->id === 3 ? 'selected' : '' }}>
+                                                        {{$currency_data->code}}
+                                                    </option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <div class="form-group mb-0">
-                                            <label>{{trans('file.Exchange Rate')}} *</label>
-                                        </div>
-                                        <div class="form-group d-flex">
-                                            <input class="form-control" type="text" id="exchange_rate" name="exchange_rate" value="{{$currency->exchange_rate}}">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text" data-toggle="tooltip" title="" data-original-title="currency exchange rate">i</span>
-                                            </div>
-                                        </div>
-                                    </div>
+
+
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-md-12">
@@ -158,6 +152,7 @@
                                                         <th>{{trans('file.Quantity')}}</th>
                                                         <th>{{trans('file.Batch No')}}</th>
                                                         <th>{{trans('file.Expired Date')}}</th>
+                                                        <th>{{trans('file.Unit Price')}}</th> <!-- Cột mới -->
                                                         <th>{{trans('file.Net Unit Price')}}</th>
                                                         <th>{{trans('file.Discount')}}</th>
                                                         <th>{{trans('file.Tax')}}</th>
@@ -173,6 +168,7 @@
                                                     <th></th>
                                                     <th></th>
                                                     <th></th>
+                                                    <th></th>
                                                     <th id="total-discount">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
                                                     <th id="total-tax">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
                                                     <th id="total">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
@@ -181,6 +177,28 @@
                                             </table>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="container-fluid">
+                                    <table class="table table-bordered table-condensed totals">
+                                        <td><strong>{{trans('file.Items')}}</strong>
+                                            <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Total')}}</strong>
+                                            <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Tax')}}</strong>
+                                            <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Discount')}}</strong>
+                                            <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Shipping Cost')}}</strong>
+                                            <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.grand total')}}</strong>
+                                            <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                    </table>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-2">
@@ -254,6 +272,7 @@
                                             <input type="number" name="shipping_cost" class="form-control" step="any"/>
                                         </div>
                                     </div>
+
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{trans('file.Attach Document')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
@@ -265,6 +284,24 @@
                                             @endif
                                         </div>
                                     </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{trans('file.Image')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
+                                            <input type="file" name="image" class="form-control" />
+                                            @if($errors->has('extension'))
+                                                <span>
+                                                   <strong>{{ $errors->first('extension') }}</strong>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{trans('file.Delivery Date')}}</label>
+                                            <input type="date" name="delivery_date" class="form-control" placeholder="Choose delivery date"/>
+                                        </div>
+                                    </div>
+
                                     @foreach($custom_fields as $field)
                                         @if(!$field->is_admin || \Auth::user()->role_id == 1)
                                             <div class="{{'col-md-'.$field->grid_value}}">
@@ -457,7 +494,7 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid">
+    {{-- <div class="container-fluid">
         <table class="table table-bordered table-condensed totals">
             <td><strong>{{trans('file.Items')}}</strong>
                 <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
@@ -478,7 +515,7 @@
                 <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
             </td>
         </table>
-    </div>
+    </div> --}}
 
     <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
         <div role="document" class="modal-dialog">
@@ -498,8 +535,8 @@
                                 <label>{{trans('file.Unit Discount')}}</label>
                                 <input type="number" name="edit_discount" class="form-control numkey">
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
+                            <div class="col-md-4" >
+                                <div class="form-group d-none" >
                                     <label>{{trans('file.Price Option')}}</strong> </label>
                                     <div class="input-group">
                                       <select class="form-control selectpicker" name="price_option" class="price-option">
@@ -527,15 +564,15 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div id="edit_unit" class="col-md-4 form-group">
+                            <div id="edit_unit" class="col-md-4 form-group d-none">
                                 <label>{{trans('file.Product Unit')}}</label>
                                 <select name="edit_unit" class="form-control selectpicker">
                                 </select>
                             </div>
-                            <div class="col-md-4 form-group">
+                            {{-- <div class="col-md-4 form-group">
                                 <label>{{trans('file.Cost')}}</label>
                                 <p id="product-cost"></p>
-                            </div>
+                            </div> --}}
                         </div>
                         <button type="button" name="update_btn" class="btn btn-primary">{{trans('file.update')}}</button>
                     </form>
@@ -571,8 +608,8 @@
                     <input type="text" name="email" placeholder="example@example.com" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>{{trans('file.Phone Number')}} *</label>
-                    <input type="text" name="phone_number" required class="form-control">
+                    <label>{{trans('file.Phone Number')}} </label>
+                    <input type="text" name="phone_number"  class="form-control">
                 </div>
                 <div class="form-group">
                     <label>{{trans('file.Address')}}</label>
@@ -1055,7 +1092,7 @@ function productSearch(data) {
                         cols += '<td><input type="text" class="form-control batch-no" disabled/> <input type="hidden" class="product-batch-id" name="product_batch_id[]"/> </td>';
                         cols += '<td class="expired-date">N/A</td>';
                     }
-
+                    cols += '<td class="net_price"></td>';
                     cols += '<td class="net_unit_price"></td>';
                     cols += '<td class="discount">{{number_format(0, $general_setting->decimal, '.', '')}}</td>';
                     cols += '<td class="tax"></td>';
@@ -1281,10 +1318,12 @@ function calculateRowProductData(quantity) {
     $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax-rate').val(tax_rate[rowindex].toFixed({{$general_setting->decimal}}));
 
     if (tax_method[rowindex] == 1) {
+        var net_price = row_product_price;
         var net_unit_price = row_product_price - product_discount[rowindex];
         var tax = net_unit_price * quantity * (tax_rate[rowindex] / 100);
         var sub_total = (net_unit_price * quantity) + tax;
 
+        $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_price').text(net_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').text(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').val(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax').text(tax.toFixed({{$general_setting->decimal}}));
@@ -1296,7 +1335,7 @@ function calculateRowProductData(quantity) {
         var net_unit_price = (100 / (100 + tax_rate[rowindex])) * sub_total_unit;
         var tax = (sub_total_unit - net_unit_price) * quantity;
         var sub_total = sub_total_unit * quantity;
-
+        $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_price').text(net_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').text(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').val(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax').text(tax.toFixed({{$general_setting->decimal}}));
@@ -1590,83 +1629,117 @@ $("#submit-button").on("click", function() {
 });
 
 $(document).on('submit', '.payment-form', function(e) {
+    var isValid = true; // Biến kiểm tra trạng thái hợp lệ
+    var errorMessages = []; // Lưu trữ thông báo lỗi
+
+    // Kiểm tra số lượng hàng trong bảng order
     var rownumber = $('table.order-list tbody tr:last').index();
-    $("table.order-list tbody .qty").each(function(index) {
-        if ($(this).val() == '') {
-            alert('One of products has no quantity!');
-            e.preventDefault();
-        }
-    });
-    if ( rownumber < 0 ) {
-        alert("Please insert product to order table!")
-        e.preventDefault();
-    }
-    else if(parseFloat($('input[name="total_qty"]').val()) <= 0) {
-        alert('Product quantity is 0');
-        e.preventDefault();
-    }
-    else if( parseFloat($("#paying-amount").val()) < parseFloat($("#paid-amount").val()) ){
-        alert('Paying amount cannot be bigger than recieved amount');
-        e.preventDefault();
-    }
-    else if( $('select[name="payment_status"]').val() == 3 && parseFloat($("#paid-amount").val()) == parseFloat($('input[name="grand_total"]').val()) ) {
-        alert('Paying amount equals to grand total! Please change payment status.');
-        e.preventDefault();
-    }
-    else if(!$('#biller_id').val()) {
-        alert('Please select a biller');
-        e.preventDefault();
-    }
-    else {
-        $("#submit-button").prop('disabled', true);
-        $("#paid-amount").prop('disabled',false);
-        $(".batch-no").prop('disabled', false);
-
-        e.preventDefault(); // Prevents the default form submission behavior
-        $.ajax({
-            url: $('.payment-form').attr('action'),
-            type: $('.payment-form').attr('method'),
-            data: $('.payment-form').serialize(),
-            success: function(response) {
-                console.log(response);
-
-                if (response.payment_method === 'pesapal' && response.redirect_url) {
-                    // Redirect to the URL returned for Pesapal payment method
-                    location.href = response.redirect_url;
-                } else if ($('select[name="sale_status"]').val() == 1 && response !== 'pesapal') {
-                    let link = "{{url('sales/gen_invoice/')}}" + '/' + response;
-                    $('#print-layout').load(link, function() {
-                        setTimeout(function() {
-                            window.print();
-                        }, 50);
-                    });
-
-                    $("#submit-button").prop('disabled', false);
-                    $('#add-payment').modal('hide');
-                    cancel($('table.order-list tbody tr:last').index());
-
-                    setTimeout(function() {
-                        window.onafterprint = function(){
-                            $('#print-layout').html('');
-                        }
-                    }, 100);
-                }
-                else if($('select[name="sale_status"]').val() != 1){
-                    localStorage.clear();
-                    location.href = "{{route('sales.index')}}";
-                }
-                else {
-                    localStorage.clear();
-                    location.href = response;
-                }
-            },
-            error: function(xhr) {
-                console.log('Form submission failed.');
+    if (rownumber < 0) {
+        errorMessages.push("Please insert product to order table!");
+        isValid = false;
+    } else {
+        $("table.order-list tbody .qty").each(function() {
+            if ($(this).val() == '' || parseFloat($(this).val()) <= 0) {
+                errorMessages.push("One of products has no valid quantity!");
+                isValid = false;
             }
         });
-
     }
+
+    // Kiểm tra tổng số lượng sản phẩm
+    if (parseFloat($('input[name="total_qty"]').val()) <= 0) {
+        errorMessages.push("Product quantity is 0");
+        isValid = false;
+    }
+
+    // Kiểm tra số tiền thanh toán
+    if (parseFloat($("#paying-amount").val()) < parseFloat($("#paid-amount").val())) {
+        errorMessages.push("Paying amount cannot be bigger than received amount");
+        isValid = false;
+    }
+
+    // Kiểm tra trạng thái thanh toán
+    if ($('select[name="payment_status"]').val() == 3 &&
+        parseFloat($("#paid-amount").val()) == parseFloat($('input[name="grand_total"]').val())) {
+        errorMessages.push("Paying amount equals to grand total! Please change payment status.");
+        isValid = false;
+    }
+
+    // Kiểm tra biller
+    if (!$('#biller_id').val()) {
+        errorMessages.push("Please select a biller");
+        isValid = false;
+    }
+
+    // Nếu không hợp lệ, ngăn form submit và hiển thị lỗi
+    if (!isValid) {
+        e.preventDefault();
+        alert(errorMessages.join("\n"));
+        return;
+    }
+
+    // Xử lý khi form hợp lệ
+    $("#submit-button").prop('disabled', true);
+    $("#paid-amount").prop('disabled', false);
+    $(".batch-no").prop('disabled', false);
+
+    // Gửi form qua AJAX
+    e.preventDefault(); // Ngăn submit mặc định
+    $.ajax({
+        url: $('.payment-form').attr('action'),
+        type: $('.payment-form').attr('method'),
+        data: new FormData($('.payment-form')[0]), // Sử dụng FormData để hỗ trợ file upload
+        processData: false, // Không xử lý dữ liệu
+        contentType: false, // Không thiết lập header Content-Type
+        success: function(response) {
+            console.log(response);
+
+            if (response.payment_method === 'pesapal' && response.redirect_url) {
+                location.href = response.redirect_url;
+            } else if ($('select[name="sale_status"]').val() == 1 && response !== 'pesapal') {
+                let link = "{{url('sales/gen_invoice/')}}" + '/' + response;
+                $('#print-layout').load(link, function() {
+                    setTimeout(function() {
+                        window.print();
+                    }, 50);
+                });
+
+                $("#submit-button").prop('disabled', false);
+                $('#add-payment').modal('hide');
+                cancel($('table.order-list tbody tr:last').index());
+
+                setTimeout(function() {
+                    window.onafterprint = function(){
+                        $('#print-layout').html('');
+                    }
+                }, 100);
+            } else if ($('select[name="sale_status"]').val() != 1) {
+                localStorage.clear();
+                location.href = "{{route('sales.index')}}";
+            } else {
+                localStorage.clear();
+                location.href = response;
+            }
+        },
+        error: function(xhr) {
+            console.log('Form submission failed.');
+            alert('Something went wrong. Please try again.');
+        }
+    });
 });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+        // Lấy ngày hiện tại
+        let today = new Date();
+        let formattedDate = String(today.getDate()).padStart(2, '0') + '-' +
+            String(today.getMonth() + 1).padStart(2, '0') + '-' +
+            today.getFullYear();
+
+        // Gán giá trị ngày hiện tại cho input
+        document.getElementById('created_at').value = formattedDate;
+    });
+
 </script>
 <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
 @endpush

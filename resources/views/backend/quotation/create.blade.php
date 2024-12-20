@@ -77,6 +77,7 @@
                                                         <th>{{trans('file.Code')}}</th>
                                                         <th>{{trans('file.Batch No')}}</th>
                                                         <th>{{trans('file.Quantity')}}</th>
+                                                        <th>{{trans('file.Unit Price')}}</th>
                                                         <th>{{trans('file.Net Unit Price')}}</th>
                                                         <th>{{trans('file.Discount')}}</th>
                                                         <th>{{trans('file.Tax')}}</th>
@@ -91,6 +92,7 @@
                                                     <th></th>
 		                                            <th id="total-qty">0</th>
 		                                            <th></th>
+                                                    <th></th>
 		                                            <th id="total-discount">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
 		                                            <th id="total-tax">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
 		                                            <th id="total">{{number_format(0, $general_setting->decimal, '.', '')}}</th>
@@ -100,6 +102,28 @@
 		                                </div>
 		                            </div>
 		                        </div>
+                                <div class="container-fluid">
+                                    <table class="table table-bordered table-condensed totals">
+                                        <td><strong>{{trans('file.Items')}}</strong>
+                                            <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Total')}}</strong>
+                                            <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Tax')}}</strong>
+                                            <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Discount')}}</strong>
+                                            <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Shipping Cost')}}</strong>
+                                            <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.grand total')}}</strong>
+                                            <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                    </table>
+                                </div>
 		                        <div class="row">
                                     <div class="col-md-2">
                                         <div class="form-group">
@@ -180,6 +204,17 @@
                                             @endif
                                 		</div>
                                 	</div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{trans('file.Image')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
+                                            <input type="file" name="image" class="form-control" />
+                                            @if($errors->has('extension'))
+                                                <span>
+                                                   <strong>{{ $errors->first('extension') }}</strong>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="row">
                                 	<div class="col-md-12">
@@ -201,7 +236,7 @@
         </div>
     </div>
 
-    <div class="container-fluid">
+    {{-- <div class="container-fluid">
         <table class="table table-bordered table-condensed totals">
             <td><strong>{{trans('file.Items')}}</strong>
                 <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
@@ -222,7 +257,7 @@
                 <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
             </td>
         </table>
-    </div>
+    </div> --}}
     <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
         <div role="document" class="modal-dialog">
             <div class="modal-content">
@@ -261,11 +296,12 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div id="edit_unit" class="col-md-4 form-group">
+                            <div id="edit_unit" class="col-md-4 form-group d-none">
                                 <label>{{trans('file.Product Unit')}}</label>
                                 <select name="edit_unit" class="form-control selectpicker">
                                 </select>
                             </div>
+
                         </div>
 
                             <button type="button" name="update_btn" class="btn btn-primary">{{trans('file.update')}}</button>
@@ -461,7 +497,7 @@ $('button[name="update_btn"]').on("click", function() {
         });
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.imei-number').val(imeiNumbers);
     }
-    
+
     var edit_discount = $('input[name="edit_discount"]').val();
     var edit_qty = $('input[name="edit_qty"]').val();
     var edit_unit_price = $('input[name="edit_unit_price"]').val();
@@ -607,6 +643,7 @@ function productSearch(data){
                     else
                         cols += '<td><input type="text" class="form-control batch-no" disabled/> <input type="hidden" class="product-batch-id" name="product_batch_id[]"/> </td>';
                     cols += '<td><input type="number" class="form-control qty" name="qty[]" value="1" step="any" required/></td>';
+                    cols += '<td class="net_price"></td>';
                     cols += '<td class="net_unit_price"></td>';
                     cols += '<td class="discount">{{number_format(0, $general_setting->decimal, '.', '')}}</td>';
                     cols += '<td class="tax"></td>';
@@ -790,10 +827,12 @@ function calculateRowProductData(quantity) {
     $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax-rate').val(tax_rate[rowindex].toFixed({{$general_setting->decimal}}));
 
     if (tax_method[rowindex] == 1) {
+        var net_price = row_product_price;
         var net_unit_price = row_product_price - product_discount[rowindex];
         var tax = net_unit_price * quantity * (tax_rate[rowindex] / 100);
         var sub_total = (net_unit_price * quantity) + tax;
 
+        $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_price').text(net_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').text(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').val(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax').text(tax.toFixed({{$general_setting->decimal}}));
@@ -806,6 +845,7 @@ function calculateRowProductData(quantity) {
         var tax = (sub_total_unit - net_unit_price) * quantity;
         var sub_total = sub_total_unit * quantity;
 
+        $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_price').text(net_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').text(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.net_unit_price').val(net_unit_price.toFixed({{$general_setting->decimal}}));
         $('table.order-list tbody tr:nth-child(' + (rowindex + 1) + ')').find('.tax').text(tax.toFixed({{$general_setting->decimal}}));

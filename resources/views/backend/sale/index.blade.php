@@ -109,6 +109,9 @@
                 <tr>
                     <th class="not-exported"></th>
                     <th>{{trans('file.date')}}</th>
+                     <th>{{trans('file.Delivery date')}}</th>
+                     <th>{{trans('file.Document')}}</th>
+                     <th>{{trans('file.Image')}}</th>
                     <th>{{trans('file.reference')}}</th>
                     <th>{{trans('file.Biller')}}</th>
                     <th>{{trans('file.customer')}}</th>
@@ -141,6 +144,7 @@
                 <th></th>
                 <th></th>
                 <th></th>
+
                 @foreach($custom_fields as $fieldName)
                 <th></th>
                 @endforeach
@@ -598,7 +602,8 @@
     @endif
 
 
-    var columns = [{"data": "key"}, {"data": "date"}, {"data": "reference_no"}, {"data": "biller"}, {"data": "customer"}, {"data": "sale_status"}, {"data": "payment_status"},{"data": "payment_method"},{"data": "delivery_status"}, {"data": "grand_total"}, {"data": "returned_amount"}, {"data": "paid_amount"}, {"data": "due"}];
+    var columns = [{"data": "key"}, {"data": "date"},  {"data": "delivery_date"},{"data": "document"},
+    {"data": "image"},  {"data": "reference_no"}, {"data": "biller"}, {"data": "customer"}, {"data": "sale_status"}, {"data": "payment_status"},{"data": "payment_method"},{"data": "delivery_status"}, {"data": "grand_total"}, {"data": "returned_amount"}, {"data": "paid_amount"}, {"data": "due"}];
     var field_name = <?php echo json_encode($field_name) ?>;
     for(i = 0; i < field_name.length; i++) {
         columns.push({"data": field_name[i]});
@@ -1218,15 +1223,22 @@
             $( dt_selector.column( 9 ).footer() ).html(dt_selector.cells( rows, 9, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
             $( dt_selector.column( 10 ).footer() ).html(dt_selector.cells( rows, 10, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
             $( dt_selector.column( 11 ).footer() ).html(dt_selector.cells( rows, 11, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 12 ).footer() ).html(dt_selector.cells( rows, 12, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 13 ).footer() ).html(dt_selector.cells( rows, 13, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 14 ).footer() ).html(dt_selector.cells( rows, 14, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
         }
         else {
             $( dt_selector.column( 8 ).footer() ).html(dt_selector.cells( rows, 8, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
             $( dt_selector.column( 9 ).footer() ).html(dt_selector.cells( rows, 9, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
             $( dt_selector.column( 10 ).footer() ).html(dt_selector.cells( rows, 10, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
             $( dt_selector.column( 11 ).footer() ).html(dt_selector.cells( rows, 11, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 12 ).footer() ).html(dt_selector.cells( rows, 12, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 13 ).footer() ).html(dt_selector.cells( rows, 13, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
+            $( dt_selector.column( 14 ).footer() ).html(dt_selector.cells( rows, 14, { page: 'current' } ).data().sum().toFixed({{$general_setting->decimal}}));
         }
     }
 
+    //details khi user bấm vào một rơw
     function saleDetails(sale){
         $("#sale-details input[name='sale_id']").val(sale[13]);
 

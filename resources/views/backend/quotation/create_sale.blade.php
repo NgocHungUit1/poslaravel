@@ -212,6 +212,28 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="container-fluid">
+                                    <table class="table table-bordered table-condensed totals">
+                                         <td><strong>{{trans('file.Items')}}</strong>
+                                            <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Total')}}</strong>
+                                            <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Tax')}}</strong>
+                                            <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Order Discount')}}</strong>
+                                            <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.Shipping Cost')}}</strong>
+                                            <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                        <td><strong>{{trans('file.grand total')}}</strong>
+                                            <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
+                                        </td>
+                                    </table>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-2">
                                         <div class="form-group">
@@ -284,18 +306,7 @@
                                             <input type="number" name="shipping_cost" class="form-control" value="{{$lims_quotation_data->shipping_cost}}" step="any"/>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>{{trans('file.Attach Document')}}</label>
-                                            <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
-                                            <input type="file" name="document" class="form-control" />
-                                            @if($errors->has('extension'))
-                                                <span>
-                                                   <strong>{{ $errors->first('extension') }}</strong>
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
+
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>{{trans('file.Sale Status')}} *</label>
@@ -307,6 +318,12 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
+                                            <label>{{trans('file.Delivery Date')}}</label>
+                                            <input type="date" name="delivery_date" class="form-control" placeholder="Choose delivery date"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
                                             <label>{{trans('file.Payment Status')}} *</label>
                                             <select name="payment_status" class="form-control">
                                                 <option value="1">{{trans('file.Pending')}}</option>
@@ -314,6 +331,55 @@
                                                 <option value="3">{{trans('file.Partial')}}</option>
                                                 <option value="4">{{trans('file.Paid')}}</option>
                                             </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{ trans('file.Attach Document') }}</label>
+                                            <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx, and txt file is supported"></i>
+
+                                            <!-- Input file -->
+                                            <input type="file" name="document" class="form-control" />
+
+                                            <!-- Hidden input để giữ giá trị tệp hiện tại -->
+                                            @if(isset($lims_quotation_data->document) && $lims_quotation_data->document)
+                                                <input type="hidden" name="current_document" value="{{ $lims_quotation_data->document }}">
+                                                <div>
+                                                    <img src="{{ asset('/images/quotation/' . $lims_quotation_data->document) }}" alt="Hình ảnh" style="max-width: 20%"/>
+                                                </div>
+                                            @endif
+
+                                            @if($errors->has('extension'))
+                                                <span>
+                                                    <strong>{{ $errors->first('extension') }}</strong>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{ trans('file.Image') }}</label>
+                                            <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx, and txt file is supported"></i>
+                                            <input type="file" name="image" class="form-control" />
+
+
+                                            @if($errors->has('extension'))
+                                                <span>
+                                                    <strong>{{ $errors->first('extension') }}</strong>
+                                                </span>
+                                            @endif
+
+                                            <!-- Hiển thị hình ảnh hiện tại (nếu có) -->
+                                            @if(isset($lims_quotation_data->image) && $lims_quotation_data->image)
+                                            <input type="hidden" name="current_image" value="{{ $lims_quotation_data->image }}">
+                                            <div>
+                                                <img src="{{ asset('/images/quotation/' . $lims_quotation_data->image) }}" alt="Hình ảnh" style="max-width: 20%"/>
+                                            </div>
+                                        @endif
+
                                         </div>
                                     </div>
                                 </div>
@@ -408,28 +474,7 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid">
-        <table class="table table-bordered table-condensed totals">
-             <td><strong>{{trans('file.Items')}}</strong>
-                <span class="pull-right" id="item">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Total')}}</strong>
-                <span class="pull-right" id="subtotal">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Order Tax')}}</strong>
-                <span class="pull-right" id="order_tax">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Order Discount')}}</strong>
-                <span class="pull-right" id="order_discount">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.Shipping Cost')}}</strong>
-                <span class="pull-right" id="shipping_cost">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-            <td><strong>{{trans('file.grand total')}}</strong>
-                <span class="pull-right" id="grand_total">{{number_format(0, $general_setting->decimal, '.', '')}}</span>
-            </td>
-        </table>
-    </div>
+
     <div id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
         <div role="document" class="modal-dialog">
             <div class="modal-content">
@@ -1200,77 +1245,78 @@
     });
 
     $(document).on('submit', '.sale-form', function(e) {
-        var rownumber = $('table.order-list tbody tr:last').index();
-        if ( rownumber < 0 ) {
-            alert("Please insert product to order table!")
-            e.preventDefault();
-        }
-        else if(parseFloat($('input[name="total_qty"]').val()) <= 0) {
-            alert('Product quantity is 0');
-            e.preventDefault();
-        }
-        else if( parseFloat($("#paying-amount").val()) < parseFloat($("#paid-amount").val()) ){
-            alert('Paying amount cannot be bigger than recieved amount');
-            e.preventDefault();
-        }
-        else if( $('select[name="payment_status"]').val() == 3 && parseFloat($("#paid-amount").val()) == parseFloat($('input[name="grand_total"]').val()) ) {
-            alert('Paying amount equals to grand total! Please change payment status.');
-            e.preventDefault();
-        }
-        else if(!$('#biller_id').val()) {
-            alert('Please select a biller');
-            e.preventDefault();
-        }
-        else {
-            $("#submit-button").prop('disabled', true);
-            $("#paid-amount").prop('disabled',false);
-            $(".batch-no").prop('disabled', false);
+    e.preventDefault(); // Ngăn chặn hành vi submit mặc định
 
-            e.preventDefault(); // Prevents the default form submission behavior
-            $.ajax({
-                url: $('.sale-form').attr('action'),
-                type: $('.sale-form').attr('method'),
-                data: $('.sale-form').serialize(),
-                success: function(response) {
-                    console.log(response);
+    var rownumber = $('table.order-list tbody tr:last').index();
+    if (rownumber < 0) {
+        alert("Please insert product to order table!");
+        return;
+    } else if (parseFloat($('input[name="total_qty"]').val()) <= 0) {
+        alert('Product quantity is 0');
+        return;
+    } else if (parseFloat($("#paying-amount").val()) < parseFloat($("#paid-amount").val())) {
+        alert('Paying amount cannot be bigger than received amount');
+        return;
+    } else if ($('select[name="payment_status"]').val() == 3 && parseFloat($("#paid-amount").val()) == parseFloat($('input[name="grand_total"]').val())) {
+        alert('Paying amount equals to grand total! Please change payment status.');
+        return;
+    } else if (!$('#biller_id').val()) {
+        alert('Please select a biller');
+        return;
+    }
 
-                    if (response.payment_method === 'pesapal' && response.redirect_url) {
-                        // Redirect to the URL returned for Pesapal payment method
-                        location.href = response.redirect_url;
-                    } else if ($('select[name="sale_status"]').val() == 1 && response !== 'pesapal') {
-                        let link = "{{url('sales/gen_invoice/')}}" + '/' + response;
-                        $('#print-layout').load(link, function() {
-                            setTimeout(function() {
-                                window.print();
-                            }, 50);
-                        });
-    
-                        $("#submit-button").prop('disabled', false);
-                        $('#add-payment').modal('hide');
-                        //cancel($('table.order-list tbody tr:last').index());
+    // Thu thập dữ liệu form và tệp
+    var formData = new FormData(this);
 
-                        setTimeout(function() {
-                            window.onafterprint = function(){
-                                $('#print-layout').html('');
-                            }
-                        }, 100);
+console.log(formData);
+
+
+    $("#submit-button").prop('disabled', true);
+    $("#paid-amount").prop('disabled', false);
+    $(".batch-no").prop('disabled', false);
+
+    $.ajax({
+        url: $('.sale-form').attr('action'),
+        type: $('.sale-form').attr('method'),
+        data: formData,
+        processData: false, // Không xử lý dữ liệu
+        contentType: false, // Không thiết lập kiểu nội dung
+        success: function(response) {
+            console.log(response);
+
+            if (response.payment_method === 'pesapal' && response.redirect_url) {
+                location.href = response.redirect_url;
+            } else if ($('select[name="sale_status"]').val() == 1 && response !== 'pesapal') {
+                let link = "{{url('sales/gen_invoice/')}}" + '/' + response;
+                $('#print-layout').load(link, function() {
+                    setTimeout(function() {
+                        window.print();
+                    }, 50);
+                });
+
+                $("#submit-button").prop('disabled', false);
+                $('#add-payment').modal('hide');
+
+                setTimeout(function() {
+                    window.onafterprint = function() {
+                        $('#print-layout').html('');
                     }
-                    else if($('select[name="sale_status"]').val() != 1){
-                        localStorage.clear();
-                        location.href = "{{route('sales.index')}}";
-                    }
-                    else {
-                        localStorage.clear();
-                        location.href = response;
-                    }
-                },
-                error: function(xhr) {
-                    console.log('Form submission failed.');
-                }
-            });
-
+                }, 100);
+            } else if ($('select[name="sale_status"]').val() != 1) {
+                localStorage.clear();
+                location.href = "{{route('sales.index')}}";
+            } else {
+                localStorage.clear();
+                location.href = response;
+            }
+        },
+        error: function(xhr) {
+            console.log('Form submission failed.');
+            $("#submit-button").prop('disabled', false);
         }
     });
+});
+
 
     </script>
 <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
