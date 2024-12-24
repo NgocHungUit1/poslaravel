@@ -308,7 +308,10 @@ class QuotationController extends Controller
                     $status = trans('file.Sent');
                 }
 
-                $nestedData['grand_total'] = number_format($quotation->grand_total, config('decimal'));
+                $nestedData['grand_total'] = number_format($quotation->grand_total);
+                $nestedData['paying_method'] = $quotation->paying_method;
+                $nestedData['paid_amount'] = number_format($quotation->paid_amount);
+                $nestedData['debt'] = number_format($quotation->debt);
                 $nestedData['options'] = '<div class="btn-group">
                             <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' . trans("file.action") . '
                               <span class="caret"></span>
@@ -361,12 +364,16 @@ class QuotationController extends Controller
                     ' "' . $quotation->order_discount . '"',
                     ' "' . $quotation->shipping_cost . '"',
                     ' "' . $quotation->grand_total . '"',
+                    ' "' . $quotation->payment_method . '"',
+                    ' "' . $quotation->paid_amount . '"',
+                    ' "' . $quotation->debt . '"',
                     ' "' . preg_replace('/\s+/S', " ", $quotation->note) . '"',
                     ' "' . $quotation->user->name . '"',
                     ' "' . $quotation->user->email . '"',
                     ' "' . $quotation->document . '"]',
-                    ' "<img src=\'' . asset('images/quotation/' . $quotation->image) . '\' alt=\'Image\' height=\'50\'>"',
-                    ' "<img src=\'' . asset('images/quotation/' . $quotation->document) . '\' alt=\'Image\' height=\'50\'>"',
+
+                    // ' "<img src=\'' . asset('images/quotation/' . $quotation->image) . '\' alt=\'Image\' height=\'50\'>"',
+                    // ' "<img src=\'' . asset('images/quotation/' . $quotation->document) . '\' alt=\'Image\' height=\'50\'>"',
 
                 );
                 $data[] = $nestedData;
@@ -399,6 +406,7 @@ class QuotationController extends Controller
 
     public function store(Request $request)
     {
+
         $data = $request->except('document');
         //return dd($data);
         $data['user_id'] = Auth::id();
@@ -455,6 +463,40 @@ class QuotationController extends Controller
 
             $data['image'] = $imageName;
         }
+        if ($data['payment_status'] == 3 || $data['payment_status'] == 4 || ($data['payment_status'] == 2 && $data['pos'] && $data['paid_amount'] > 0)) {
+            foreach ($data['paid_by_id'] as $key => $value) {
+                if ($data['paid_amount'][$key] > 0) {
+                    $paying_method = '';
+
+                    if ($data['paid_by_id'][$key] == 1)
+                        $paying_method = 'Cash';
+                    elseif ($data['paid_by_id'][$key] == 2) {
+                        $paying_method = 'Gift Card';
+                    } elseif ($data['paid_by_id'][$key] == 3)
+                        $paying_method = 'Credit Card';
+                    elseif ($data['paid_by_id'][$key] == 4)
+                        $paying_method = 'Cheque';
+                    elseif ($data['paid_by_id'][$key] == 5)
+                        $paying_method = 'Paypal';
+                    elseif ($data['paid_by_id'][$key] == 6)
+                        $paying_method = 'Deposit';
+                    elseif ($data['paid_by_id'][$key] == 7) {
+                        $paying_method = 'Points';
+
+                    } elseif ($data['paid_by_id'][$key] == 8) {
+                        $paying_method = 'Pesapal';
+                    } else {
+                        $paying_method = $data['paid_by_id'][$key]; // For string values like 'Pesapal', 'Stripe', etc.
+                    }
+
+
+                }
+            }
+        }
+        $data['payment_method'] = $paying_method;
+        $data['payment_status'] = $request->payment_status; // "3" for Partial
+        $data['debt'] = $request->paid_amount[0];    // "500.00"
+        $data['paid_amount'] = $request->paying_amount[0]; // "77"
 
         $data['reference_no'] = 'qr-' . date("Ymd") . '-' . date("his");
         $lims_quotation_data = Quotation::create($data);
@@ -888,6 +930,7 @@ class QuotationController extends Controller
     public function productQuotationData($id)
     {
         $lims_product_quotation_data = ProductQuotation::where('quotation_id', $id)->get();
+
         foreach ($lims_product_quotation_data as $key => $product_quotation_data) {
             $product = Product::find($product_quotation_data->product_id);
             if ($product_quotation_data->variant_id) {

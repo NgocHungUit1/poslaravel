@@ -464,10 +464,8 @@ class SaleController extends Controller
                     $currency_code = Currency::select('code')->find($sale->currency_id)->code;
                 else
                     $currency_code = 'N/A';
-
                 $nestedData['sale'] = array(
                     '[ "' . date(config('date_format'), strtotime($sale->created_at->toDateString())) . '"',
-                    ' "' . ($sale->delivery_date ? date(config('date_format'), strtotime($sale->delivery_date)) : 'N/A') . '"', // Xử lý delivery_date có thể null
                     ' "' . $sale->reference_no . '"',
                     ' "' . $sale_status . '"',
                     ' "' . $sale->biller->name . '"',
@@ -499,11 +497,10 @@ class SaleController extends Controller
                     ' "' . $sale->coupon_discount . '"',
                     ' "' . $sale->document . '"',
                     ' "' . $currency_code . '"',
-                    ' "' . $sale->exchange_rate . '"',
-                    // Bổ sung trường Image
-                    ' "<img src=\'' . asset('images/sale/' . $sale->image) . '\' alt=\'Image\' height=\'50\'>"',
-                    ' "<img src=\'' . asset('documents/sale/' . $sale->document) . '\' alt=\'Image\' height=\'50\'>"', // Xử lý đường dẫn ảnh
-                    ' "' . ($sale->delivery_date ? date(config('date_format'), strtotime($sale->delivery_date)) : 'N/A') . '"'
+                    ' "' . strip_tags($nestedData['delivery_status']) . '"',
+                    ' "' . $sale->exchange_rate . '"]',
+
+
                 );
 
                 $data[] = $nestedData;
@@ -986,7 +983,8 @@ class SaleController extends Controller
                     $lims_payment_data->amount = $data['paid_amount'][$key];
                     $lims_payment_data->change = $data['paying_amount'][0] - $data['paid_amount'][$key];
                     $lims_payment_data->paying_method = $paying_method;
-                    $lims_payment_data->payment_note = $data['payment_note'];
+                    $lims_payment_data->payment_note = $data['payment_note'] ?? '';
+
                     if (isset($data['payment_receiver'])) {
                         $lims_payment_data->payment_receiver = $data['payment_receiver'];
                     }

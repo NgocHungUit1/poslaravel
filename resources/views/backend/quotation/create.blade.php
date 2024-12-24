@@ -194,7 +194,7 @@
                                 	</div>
                                 	<div class="col-md-4">
                                 		<div class="form-group">
-                                			<label>{{trans('file.Attach Document')}}</label>
+                                			<label>{{trans('file.Image')}} 1</label>
                                 			<i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
                                             <input type="file" name="document" class="form-control" />
                                             @if($errors->has('extension'))
@@ -206,7 +206,7 @@
                                 	</div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{trans('file.Image')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
+                                            <label>{{trans('file.Image')}} 2</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
                                             <input type="file" name="image" class="form-control" />
                                             @if($errors->has('extension'))
                                                 <span>
@@ -215,6 +215,72 @@
                                             @endif
                                         </div>
                                     </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>{{trans('file.Payment Status')}} *</label>
+                                            <select name="payment_status" class="form-control">
+                                                <option value="1">{{trans('file.Pending')}}</option>
+                                                <option value="2">{{trans('file.Due')}}</option>
+                                                <option value="3" selected>{{trans('file.Partial')}}</option>
+                                                <option value="4">{{trans('file.Paid')}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                <div id="payment">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>{{trans('file.Paid By')}}</label>
+                                                <select name="paid_by_id[]" class="form-control">
+
+                                                    <option value="1">Cash</option>
+                                                    <option value="3">Credit Card</option>
+                                                    <option value="5">Paypal</option>
+
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Số tiền đặt cọc *</label>
+                                                <input type="number" name="paying_amount[]" class="form-control" id="paying-amount" step="any" />
+                                            </div>
+                                        </div>
+                                <!-- Thay thế input paid_amount hiện tại với: -->
+<div class="col-md-4">
+    <div class="form-group">
+        <label>Số tiền còn lại cần thanh toán *</label>
+        <input type="number" name="paid_amount[]" class="form-control" id="paid-amount" step="any" readonly/>
+    </div>
+</div>
+
+                                        <div class="col-md-4 d-none">
+                                            <div class="form-group">
+                                                <label>{{trans('file.Payment Receiver')}}</label>
+                                                <input type="text" name="payment_receiver" class="form-control" id="payment-receiver"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 d-none">
+                                            <div class="form-group">
+                                                <label>{{trans('file.Change')}}</label>
+                                                <p id="change" class="ml-2">{{number_format(0, $general_setting->decimal, '.', '')}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <div class="card-element" class="form-control">
+                                                </div>
+                                                <div class="card-errors" role="alert"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
                                 </div>
                                 <div class="row">
                                 	<div class="col-md-12">
@@ -938,6 +1004,59 @@ function calculateGrandTotal() {
     $('#grand_total').text(grand_total.toFixed({{$general_setting->decimal}}));
     $('input[name="grand_total"]').val(grand_total.toFixed({{$general_setting->decimal}}));
 }
+
+// Sửa lại sự kiện khi số tiền đặt cọc thay đổi
+$('input[name="paying_amount[]"]').on("input", function() {
+    var deposit = parseFloat($(this).val()) || 0; // Số tiền đặt cọc
+    var grand_total = parseFloat($('input[name="grand_total"]').val()) || 0; // Tổng tiền
+
+    // Tính số tiền còn lại
+    var remaining = grand_total - deposit;
+
+    // Gán giá trị cho input số tiền còn lại
+    $('input[name="paid_amount[]"]').val(remaining.toFixed({{$general_setting->decimal}}));
+});
+
+// Sửa lại phần xử lý payment_status
+$('select[name="payment_status"]').on("change", function() {
+    var payment_status = $(this).val();
+    if (payment_status == 3 || payment_status == 4) {
+        $("#payment").show();
+        $("#paying-amount").prop('required', true);
+        $("#paid-amount").prop('required', true);
+
+        if(payment_status == 4) {
+            // Trường hợp đã thanh toán hết
+            $('input[name="paying_amount[]"]').val($('input[name="grand_total"]').val());
+            $('input[name="paid_amount[]"]').val(0);
+        }
+    } else {
+        // Trường hợp chưa thanh toán
+        $("#payment").hide();
+        $("#paying-amount").prop('required', false);
+        $("#paid-amount").prop('required', false);
+        $('input[name="paying_amount[]"]').val('');
+        $('input[name="paid_amount[]"]').val('');
+    }
+});
+
+// Sửa lại validate form submit
+$('#quotation-form').on('submit', function(e) {
+    var rownumber = $('table.order-list tbody tr:last').index();
+    if (rownumber < 0) {
+        alert("Please insert product to order table!")
+        e.preventDefault();
+        return;
+    }
+
+    // Đảm bảo số tiền còn lại được gửi đi
+    if($('input[name="paid_amount[]"]').val() === '') {
+        $('input[name="paid_amount[]"]').val(0);
+    }
+
+    $("#submit-button").prop('disabled', true);
+});
+
 
 </script>
 @endpush

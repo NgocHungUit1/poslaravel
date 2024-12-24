@@ -306,7 +306,7 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{ trans('file.Attach Document') }}</label>
+                                            <label>{{ trans('file.Image') }} 1</label>
                                             <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx, and txt file is supported"></i>
                                             <input type="file" name="document" class="form-control" />
 
@@ -319,7 +319,7 @@
                                             <!-- Hiển thị tài liệu hiện tại (nếu có) -->
                                             @if(isset($lims_quotation_data->document) && $lims_quotation_data->document)
                                                 <div>
-                                                    <img src="{{ asset('/images/quotation/' . $lims_quotation_data->document) }}" alt="Hình ảnh" width="100%"/>
+                                                    <img src="{{ asset('/images/quotation/' . $lims_quotation_data->document) }}" alt="Hình ảnh" width="20%"/>
                                                 </div>
                                             @endif
                                         </div>
@@ -327,7 +327,7 @@
 
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{ trans('file.Image') }}</label>
+                                            <label>{{ trans('file.Image') }} 2</label>
                                             <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx, and txt file is supported"></i>
                                             <input type="file" name="image" class="form-control" />
 
@@ -340,7 +340,7 @@
                                             <!-- Hiển thị hình ảnh hiện tại (nếu có) -->
                                             @if(isset($lims_quotation_data->image) && $lims_quotation_data->image)
                                             <div>
-                                                <img src="{{ asset('/images/quotation/' . $lims_quotation_data->image) }}" alt="Hình ảnh" width="100%"/>
+                                                <img src="{{ asset('/images/quotation/' . $lims_quotation_data->image) }}" alt="Hình ảnh" width="20%"/>
                                             </div>
                                         @endif
 

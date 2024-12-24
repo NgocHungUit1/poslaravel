@@ -110,8 +110,8 @@
                     <th class="not-exported"></th>
                     <th>{{trans('file.date')}}</th>
                      <th>{{trans('file.Delivery date')}}</th>
-                     <th>{{trans('file.Document')}}</th>
-                     <th>{{trans('file.Image')}}</th>
+                     <th>{{trans('file.Image')}} 1</th>
+                     <th>{{trans('file.Image')}} 2</th>
                     <th>{{trans('file.reference')}}</th>
                     <th>{{trans('file.Biller')}}</th>
                     <th>{{trans('file.customer')}}</th>
@@ -743,20 +743,87 @@
     });
 
     $(document).on("click", "#print-btn", function() {
-        var divContents = document.getElementById("sale-details").innerHTML;
-        //console.log(divContents);
-        var a = window.open('');
-        a.document.write('<html>');
-        a.document.write('<body>');
-        a.document.write('<style>body{line-height: 1.15;-webkit-text-size-adjust: 100%;}.d-print-none{display:none}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.row{width:100%;margin-right: -15px;margin-left: -15px;}.col-md-12{width:100%;display:block;padding: 5px 15px;}.col-md-6{width: 50%;float:left;padding: 5px 15px;}table{width:100%;margin-top:30px;}th{text-aligh:left}td{padding:10px}table,th,td{border: 1px solid black; border-collapse: collapse;}</style><style>@media print {.modal-dialog { max-width: 1000px;} }</style>');
-        a.document.write(divContents);
-        a.document.write('</body></html>');
-        a.document.close();
-        a.print();
-        setTimeout(function(){a.close();},10);
-        //setTimeout(function(){a.print();},20);
-        //a.print();
-    });
+    var divContents = document.getElementById("sale-details").innerHTML;
+    var a = window.open('', '_blank');
+
+    a.document.write(`
+        <html>
+        <head>
+            <title>Print Sale Details</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.5;
+                    margin: 0;
+                    padding: 0;
+                    width: 100%;
+                    overflow-x: hidden;
+                }
+                .d-print-none {
+                    display: none;
+                }
+                .text-left {
+                    text-align: left;
+                }
+                .text-center {
+                    text-align: center;
+                }
+                .text-right {
+                    text-align: right;
+                }
+                .row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 20px;
+                }
+                .col-md-6 {
+                    width: 48%;
+                    padding: 10px;
+                    border: 1px solid #000;
+                    border-radius: 5px;
+                    background-color: #f9f9f9;
+                    box-sizing: border-box;
+                }
+                table {
+                    width: 100%;
+                    margin-top: 30px;
+                    border-collapse: collapse;
+                    table-layout: fixed; /* Đảm bảo bảng không vượt quá chiều rộng */
+                }
+                th, td {
+                    padding: 10px;
+                    border: 1px solid black;
+                    text-align: left;
+                    word-wrap: break-word; /* Tự động xuống dòng nếu nội dung quá dài */
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                    }
+                    .modal-dialog {
+                        max-width: 100%;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            ${divContents}
+        </body>
+        </html>
+    `);
+
+    a.document.close();
+    a.print();
+
+    setTimeout(function() {
+        a.close();
+    }, 10);
+});
 
     $(document).on("click", "table.sale-list tbody .add-payment", function() {
         $("#cheque").hide();
@@ -1242,14 +1309,35 @@
     function saleDetails(sale){
         $("#sale-details input[name='sale_id']").val(sale[13]);
 
-        var htmltext = '<strong>{{trans("file.date")}}: </strong>'+sale[0]+'<br><strong>{{trans("file.reference")}}: </strong>'+sale[1]+'<br><strong>{{trans("file.Warehouse")}}: </strong>'+sale[27]+'<br><strong>{{trans("file.Sale Status")}}: </strong>'+sale[2]+'<br><strong>{{trans("file.Currency")}}: </strong>'+sale[31];
-        if(sale[32])
-            htmltext += '<br><strong>{{trans("file.Exchange Rate")}}: </strong>'+sale[32]+'<br>';
-        else
-            htmltext += '<br><strong>{{trans("file.Exchange Rate")}}: </strong>N/A<br>';
+        var htmltext = '<strong>{{trans("file.date")}}: </strong>'+sale[0]+'<br><strong>{{trans("file.reference")}}: </strong>'+sale[1]+'<br><strong>{{trans("file.Sale Status")}}: </strong>'+sale[2] +'<br><strong>{{trans("file.Delivery Status")}}: </strong>'+sale[32];
+
         if(sale[30])
-            htmltext += '<strong>{{trans("file.Attach Document")}}: </strong><a href="documents/sale/'+sale[30]+'">Download</a><br>';
-        htmltext += '<br><div class="row"><div class="col-md-6"><strong>{{trans("file.From")}}:</strong><br>'+sale[3]+'<br>'+sale[4]+'<br>'+sale[5]+'<br>'+sale[6]+'<br>'+sale[7]+'<br>'+sale[8]+'</div><div class="col-md-6"><div class="float-right"><strong>{{trans("file.To")}}:</strong><br>'+sale[9]+'<br>'+sale[10]+'<br>'+sale[11]+'<br>'+sale[12]+'</div></div></div>';
+        htmltext += `
+    <br>
+<div class="delivery-info">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="bordered-box customer">
+                <strong>Thông tin người gửi:</strong><br>
+                <strong>Tên:</strong> ${sale[3]}<br>
+                <strong>Số điện thoại:</strong> ${sale[4]}<br>
+                <strong>Địa chỉ:</strong> ${sale[6]}, ${sale[7]}<br>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="bordered-box customer">
+                <strong>Thông tin người nhận:</strong><br>
+                <strong>Tên:</strong> ${sale[9]}<br>
+                <strong>Số điện thoại:</strong> ${sale[10]}<br>
+                <strong>Địa chỉ:</strong> ${sale[11]}, ${sale[12]}<br>
+            </div>
+        </div>
+    </div>
+</div>
+
+`;
+
+
         $.get('sales/product_sale/' + sale[13], function(data){
             $(".product-sale-list tbody").remove();
             var name_code = data[0];
@@ -1346,7 +1434,7 @@
 
             $("table.product-sale-list").append(newBody);
         });
-        var htmlfooter = '<p><strong>{{trans("file.Sale Note")}}:</strong> '+sale[23]+'</p><p><strong>{{trans("file.Staff Note")}}:</strong> '+sale[24]+'</p><strong>{{trans("file.Created By")}}:</strong><br>'+sale[25]+'<br>'+sale[26];
+        var htmlfooter = '</p><p><strong>{{trans("file.Staff Note")}}:</strong> '+sale[24]+'</p><strong>{{trans("file.Created By")}}:</strong><br>'+sale[25]+'<br>'+sale[26];
         $('#sale-content').html(htmltext);
         $('#sale-footer').html(htmlfooter);
         $('#sale-details').modal('show');
@@ -1395,5 +1483,29 @@
         });
     });
 </script>
+<style>
+    .delivery-info .bordered-box {
+    border: 1px solid #dee2e6; /* Khung viền đen */
+    padding: 10px;            /* Khoảng cách giữa nội dung và viền */
+    border-radius: 5px;       /* Góc bo tròn */
+    background-color: #f9f9f9; /* Nền nhạt */
+    margin-bottom: 10px;      /* Khoảng cách dưới */
+}
+
+.delivery-info .row {
+    display: flex;             /* Đặt các phần tử con nằm ngang */
+    justify-content: space-between; /* Căn đều khoảng cách giữa các phần tử */
+    gap: 15px;                 /* Khoảng cách giữa các cột */
+}
+
+.delivery-info .col-md-6 {
+    flex: 1;                   /* Các cột chiếm không gian bằng nhau */
+    max-width: 48%;            /* Đảm bảo mỗi cột không vượt quá 48% chiều rộng */
+    box-sizing: border-box;    /* Đảm bảo padding không làm thay đổi kích thước hộp */
+}
+
+
+</style>
 <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
 @endpush
+
