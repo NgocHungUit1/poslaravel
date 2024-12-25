@@ -363,15 +363,51 @@ class SaleController extends Controller
                 else
                     $nestedData['payment_status'] = '<div class="badge badge-success">' . trans('file.Paid') . '</div>';
                 $delivery_data = DB::table('deliveries')->select('status')->where('sale_id', $sale->id)->first();
+                $deliveries = Delivery::with('courier')->where('sale_id', $sale->id)->get();
+
+                if ($deliveries->isEmpty()) {
+                    // Gán giá trị mặc định nếu không có bản ghi
+                    $nestedData['courier'] = 'N/A';
+                    $nestedData['delivery_by'] = '';
+                    $nestedData['recieved_by'] = '';
+                    $nestedData['address'] = '';
+                    $nestedData['note'] = '';
+                } else {
+                    foreach ($deliveries as $delivery) {
+                        $nestedData['courier'] = $delivery->courier ? $delivery->courier->name : 'N/A';
+                        $nestedData['delivery_by'] = $delivery->delivered_by ?? '';
+                        $nestedData['recieved_by'] = $delivery->recieved_by ?? '';
+                        $nestedData['address'] = $delivery->address ?? '';
+                        $nestedData['note'] = $delivery->note ?? '';
+                    }
+                }
+
+
                 if ($delivery_data) {
-                    if ($delivery_data->status == 1)
-                        $nestedData['delivery_status'] = '<div class="badge badge-primary">' . trans('file.Packing') . '</div>';
-                    elseif ($delivery_data->status == 2)
+                    if ($delivery_data->status == 1) {
+                        $nestedData['delivery_status'] = '<div class="badge badge-primary">' . trans('file.Waiting for Pickup/Delivery') . '</div>';
+                    } elseif ($delivery_data->status == 2) {
                         $nestedData['delivery_status'] = '<div class="badge badge-info">' . trans('file.Delivering') . '</div>';
-                    elseif ($delivery_data->status == 3)
-                        $nestedData['delivery_status'] = '<div class="badge badge-success">' . trans('file.Delivered') . '</div>';
-                } else
+                    } elseif ($delivery_data->status == 3) {
+                        $nestedData['delivery_status'] = '<div class="badge badge-warning">' . trans('file.Completed') . '</div>';
+                    } elseif ($delivery_data->status == 4) {
+                        $nestedData['delivery_status'] = '<div class="badge badge-danger">' . trans('file.Cancelled') . '</div>';
+                    } elseif ($delivery_data->status == 5) {
+                        $nestedData['delivery_status'] = '<div class="badge badge-dark">' . trans('file.Failed') . '</div>';
+                    } elseif ($delivery_data->status == 6) {
+                        $nestedData['delivery_status'] = '<div class="badge badge-secondary">' . trans('file.Waiting for COD') . '</div>';
+                    } elseif ($delivery_data->status == 7) {
+                        $nestedData['delivery_status'] = '<div class="badge badge-light">' . trans('file.Paid') . '</div>';
+                    } elseif ($delivery_data->status == 8) {
+                        $nestedData['delivery_status'] = '<div class="badge badge-default">' . trans('file.Unpaid') . '</div>';
+                    } else {
+                        $nestedData['delivery_status'] = '<div class="badge badge-default">' . trans('file.Unknown Status') . '</div>';
+                    }
+                } else {
                     $nestedData['delivery_status'] = 'N/A';
+                }
+
+
 
                 $nestedData['grand_total'] = number_format($sale->grand_total, config('decimal'));
                 //$nestedData['grand_total'] = \Illuminate\Support\Number::format($sale->grand_total, locale: 'id');
@@ -464,6 +500,7 @@ class SaleController extends Controller
                     $currency_code = Currency::select('code')->find($sale->currency_id)->code;
                 else
                     $currency_code = 'N/A';
+
                 $nestedData['sale'] = array(
                     '[ "' . date(config('date_format'), strtotime($sale->created_at->toDateString())) . '"',
                     ' "' . $sale->reference_no . '"',
@@ -498,7 +535,13 @@ class SaleController extends Controller
                     ' "' . $sale->document . '"',
                     ' "' . $currency_code . '"',
                     ' "' . strip_tags($nestedData['delivery_status']) . '"',
+                    ' "' . $nestedData['courier'] . '"',
+                    ' "' . $nestedData['address'] . '"',
+                    ' "' . $nestedData['delivery_by'] . '"',
+                    ' "' . $nestedData['recieved_by'] . '"',
+                    ' "' . $nestedData['note'] . '"',
                     ' "' . $sale->exchange_rate . '"]',
+
 
 
                 );
@@ -2801,7 +2844,7 @@ class SaleController extends Controller
         $data['payment_reference'] = 'spr-' . date("Ymd") . '-' . date("his");
         $lims_payment_data->payment_reference = $data['payment_reference'];
         $lims_payment_data->amount = $data['amount'];
-        $lims_payment_data->change = $data['paying_amount'] - $data['amount'];
+        $lims_payment_data->change = $data['amount'] - $data['amount'];
         $lims_payment_data->paying_method = $paying_method;
         $lims_payment_data->payment_note = $data['payment_note'];
         $lims_payment_data->payment_receiver = $data['payment_receiver'];

@@ -1,4 +1,4 @@
-<?php 
+<?php
 return [
 	"dashboard" => "bảng điều khiển",
 	"language" => "ngôn ngữ",
@@ -603,5 +603,18 @@ return [
 	"This product has IMEI or Serial numbers" => "Sản phẩm này có số IMEI hoặc số sê-ri",
 	"IMEI or Serial Numbers" => "IMEI hoặc Số sê-ri",
 	"RTL Layout" => "Bố cục RTL",
+    'All' => 'Tất cả',
+    'Saved Temporarily' => 'Lưu tạm',
+    'Waiting for Pickup/Delivery' => 'Chờ giao/lấy hàng',
+    'Delivering' => 'Đang giao hàng',
+    'Completed' => 'Hoàn thành',
+    'Cancelled' => 'Đã hủy',
+    'Failed' => 'Thất bại',
+    'Returned' => 'Đã chuyển hoàn',
+    'Waiting for COD' => 'Chờ thu COD',
+    'Paid' => 'Đã thanh toán',
+    'Unpaid' => 'Chưa thanh toán',
+    'Debt Amount' => 'Còn nợ',
+
 ];
 ?>

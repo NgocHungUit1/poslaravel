@@ -110,12 +110,25 @@ class DeliveryController extends Controller
             else
                 $packing_slip_references[0] = 'N/A';
 
-            if($delivery->status == 1)
-                $status = trans('file.Packing');
-            elseif($delivery->status == 2)
-                $status = trans('file.Delivering');
-            else
-                $status = trans('file.Delivered');
+                if ($delivery->status == 1) {
+                    $status = trans('file.Packing');
+                } elseif ($delivery->status == 2) {
+                    $status = trans('file.Delivering');
+                } elseif ($delivery->status == 3) {
+                    $status = trans('file.Completed');
+                } elseif ($delivery->status == 4) {
+                    $status = trans('file.Cancelled');
+                } elseif ($delivery->status == 5) {
+                    $status = trans('file.Failed');
+                } elseif ($delivery->status == 6) {
+                    $status = trans('file.Waiting for COD');
+                } elseif ($delivery->status == 7) {
+                    $status = trans('file.Paid');
+                } elseif ($delivery->status == 8) {
+                    $status = trans('file.Unpaid');
+                } else {
+                    $status = trans('file.Unknown Status'); // Trạng thái không xác định
+                }
 
             $barcode = \DNS2D::getBarcodePNG($delivery->reference_no, 'QRCODE');
             if($delivery->sale)
@@ -129,12 +142,26 @@ class DeliveryController extends Controller
                 $nestedData['address'] = $delivery->address;
                 $nestedData['products'] = implode(",", $product_names);
                 $nestedData['grand_total'] = number_format($customer_sale[0]->grand_total, 2);
-                if($delivery->status == 1)
-                    $nestedData['status'] = '<div class="badge badge-primary">'.trans('file.Packing').'</div>';
-                elseif($delivery->status == 2)
-                    $nestedData['status'] = '<div class="badge badge-primary">'.trans('file.Delivering').'</div>';
-                else
-                    $nestedData['status'] = '<div class="badge badge-primary">'.trans('file.Delivered').'</div>';
+                if ($delivery->status == 1) {
+                    $nestedData['status'] = '<div class="badge badge-info">'.trans('file.Packing').'</div>';
+                } elseif ($delivery->status == 2) {
+                    $nestedData['status'] = '<div class="badge badge-warning">'.trans('file.Delivering').'</div>';
+                } elseif ($delivery->status == 3) {
+                    $nestedData['status'] = '<div class="badge badge-success">'.trans('file.Completed').'</div>';
+                } elseif ($delivery->status == 4) {
+                    $nestedData['status'] = '<div class="badge badge-danger">'.trans('file.Cancelled').'</div>';
+                } elseif ($delivery->status == 5) {
+                    $nestedData['status'] = '<div class="badge badge-dark">'.trans('file.Failed').'</div>';
+                } elseif ($delivery->status == 6) {
+                    $nestedData['status'] = '<div class="badge badge-secondary">'.trans('file.Waiting for COD').'</div>';
+                } elseif ($delivery->status == 7) {
+                    $nestedData['status'] = '<div class="badge badge-light">'.trans('file.Paid').'</div>';
+                } elseif ($delivery->status == 8) {
+                    $nestedData['status'] = '<div class="badge badge-info">'.trans('file.Unpaid').'</div>';
+                } else {
+                    $nestedData['status'] = '<div class="badge badge-default">'.trans('file.Unknown Status').'</div>';
+                }
+
                 $nestedData['options'] = '<div class="btn-group">
                             <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.trans("file.action").'
                               <span class="caret"></span>
