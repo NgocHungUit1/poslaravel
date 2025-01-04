@@ -285,7 +285,7 @@ class QuotationController extends Controller
                 $nestedData['image'] = $quotation->image
                     ? '<img src="' . asset('images/quotation/' . $quotation->image) . '" alt="Image" height="50">'
                     : 'No Image';
-                $nestedData['document'] = $quotation->image
+                $nestedData['document'] = $quotation->document
                     ? '<img src="' . asset('images/quotation/' . $quotation->document) . '" alt="Image" height="50">'
                     : 'No Image';
                 $nestedData['reference_no'] = $quotation->reference_no;
@@ -370,10 +370,10 @@ class QuotationController extends Controller
                     ' "' . preg_replace('/\s+/S', " ", $quotation->note) . '"',
                     ' "' . $quotation->user->name . '"',
                     ' "' . $quotation->user->email . '"',
+                    ' "<img src=\'' . asset('images/quotation/' . $quotation->document) . '\' alt=\'Image\' height=\'50\'>"',
+                    ' "<img src=\'' . asset('images/quotation/' . $quotation->image) . '\' alt=\'Image\' height=\'50\'>"',
+                    ' "' . $quotation->customer->email . '"',
                     ' "' . $quotation->document . '"]',
-
-                    // ' "<img src=\'' . asset('images/quotation/' . $quotation->image) . '\' alt=\'Image\' height=\'50\'>"',
-                    // ' "<img src=\'' . asset('images/quotation/' . $quotation->document) . '\' alt=\'Image\' height=\'50\'>"',
 
                 );
                 $data[] = $nestedData;
@@ -396,10 +396,11 @@ class QuotationController extends Controller
             $lims_biller_list = Biller::where('is_active', true)->get();
             $lims_warehouse_list = Warehouse::where('is_active', true)->get();
             $lims_customer_list = Customer::where('is_active', true)->get();
+            $lims_customer_group_all = CustomerGroup::where('is_active', true)->get();
             $lims_supplier_list = Supplier::where('is_active', true)->get();
             $lims_tax_list = Tax::where('is_active', true)->get();
 
-            return view('backend.quotation.create', compact('lims_biller_list', 'lims_warehouse_list', 'lims_customer_list', 'lims_supplier_list', 'lims_tax_list'));
+            return view('backend.quotation.create', compact('lims_biller_list', 'lims_warehouse_list', 'lims_customer_list', 'lims_supplier_list', 'lims_tax_list', 'lims_customer_group_all'));
         } else
             return redirect()->back()->with('not_permitted', 'Sorry! You are not allowed to access this module');
     }
@@ -407,7 +408,7 @@ class QuotationController extends Controller
     public function store(Request $request)
     {
 
-        $data = $request->except('document');
+        $data = $request->all();
         //return dd($data);
         $data['user_id'] = Auth::id();
 
@@ -463,6 +464,7 @@ class QuotationController extends Controller
 
             $data['image'] = $imageName;
         }
+
         if ($data['payment_status'] == 3 || $data['payment_status'] == 4 || ($data['payment_status'] == 2 && $data['pos'] && $data['paid_amount'] > 0)) {
             foreach ($data['paid_by_id'] as $key => $value) {
                 if ($data['paid_amount'][$key] > 0) {
@@ -499,7 +501,9 @@ class QuotationController extends Controller
         $data['paid_amount'] = $request->paying_amount[0]; // "77"
 
         $data['reference_no'] = 'qr-' . date("Ymd") . '-' . date("his");
+
         $lims_quotation_data = Quotation::create($data);
+
         if ($lims_quotation_data->quotation_status == 2) {
             //collecting mail data
             $lims_customer_data = Customer::find($data['customer_id']);
