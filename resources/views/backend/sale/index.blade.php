@@ -199,7 +199,7 @@
                                 {{ $general_setting->site_title }}</h3>
                         </div>
                         <div class="col-md-4 text-right">
-                            <i style="font-size: 15px;">{{ trans('file.Sale Details') }}</i>
+                            <i style="font-size: 15px;">{{ trans('file.Invoice') }}</i>
                         </div>
                     </div>
                 </div>
@@ -210,7 +210,8 @@
                     <thead>
                         <th>#</th>
                         <th>{{ trans('file.product') }}</th>
-                        <th>{{ trans('file.Batch No') }}</th>
+                        <th>{{ trans('file.Image') }}  1</th>
+                        <th>{{ trans('file.Image')  }} 2</th>
                         <th>{{ trans('file.Qty') }}</th>
                         <th>{{ trans('file.Returned') }}</th>
                         <th>{{ trans('file.Unit Price') }}</th>
@@ -1465,6 +1466,7 @@
                 '<br><strong>{{ trans('file.Sale Status') }}: </strong>' + sale[2]
                ;
 
+
             if (sale[30])
                 htmltext += `
     <br>
@@ -1474,15 +1476,16 @@
         <div class="col-md-6">
             <div class="bordered-box customer">
                 <strong>Thông tin người gửi:</strong><br>
-                <strong>Tên:</strong> ${sale[3]}<br>
-                <strong>Số điện thoại:</strong> ${sale[4]}<br>
-                <strong>Địa chỉ:</strong> ${sale[6]}, ${sale[7]}<br>
+                <strong>Tên công ty:</strong> ${sale[4]}<br>
+                <strong>Email:</strong> ${sale[5]}<br>
+                <strong>Số điện thoại:</strong> ${sale[6]}<br>
+                <strong>Địa chỉ:</strong> ${sale[7]}, ${sale[8]}<br>
             </div>
         </div>
         <!-- Thông tin người nhận -->
         <div class="col-md-6">
             <div class="bordered-box customer">
-                <strong>Thông tin nkhách hàng:</strong><br>
+                <strong>Thông tin khách hàng:</strong><br>
                 <strong>Tên:</strong> ${sale[9]}<br>
                 <strong>Số điện thoại:</strong> ${sale[10]}<br>
                 <strong>Địa chỉ:</strong> ${sale[12]}, ${sale[13]}<br>
@@ -1526,7 +1529,8 @@
                     var cols = '';
                     cols += '<td><strong>' + (index + 1) + '</strong></td>';
                     cols += '<td>' + name_code[index] + '</td>';
-                    cols += '<td>' + batch_no[index] + '</td>';
+                    cols += '<td>' + sale[38] + '</td>';
+                    cols += '<td>' + sale[39] + '</td>';
                     cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
                     cols += '<td>' + return_qty[index] + '</td>';
                     cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(

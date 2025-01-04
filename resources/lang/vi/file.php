@@ -615,6 +615,7 @@ return [
     'Paid' => 'Đã thanh toán',
     'Unpaid' => 'Chưa thanh toán',
     'Debt Amount' => 'Còn nợ',
+    'Delivery Status' => 'Trạng thái giao hàng',
 
 ];
 ?>

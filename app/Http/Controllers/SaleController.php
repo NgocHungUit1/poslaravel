@@ -540,6 +540,8 @@ class SaleController extends Controller
                     ' "' . $nestedData['delivery_by'] . '"',
                     ' "' . $nestedData['recieved_by'] . '"',
                     ' "' . $nestedData['note'] . '"',
+                    ' "<img src=\'' . asset('documents/sale/' . $sale->document) . '\' alt=\'Image\' height=\'50\'>"',
+                    ' "<img src=\'' . asset('images/sale/' . $sale->image) . '\' alt=\'Image\' height=\'50\'>"',
                     ' "' . $sale->exchange_rate . '"]',
 
 
