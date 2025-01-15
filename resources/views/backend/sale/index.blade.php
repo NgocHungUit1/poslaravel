@@ -140,6 +140,7 @@
                         <th>{{ trans('file.Returned Amount') }}</th>
                         <th>{{ trans('file.Paid') }}</th>
                         <th>{{ trans('file.Due') }}</th>
+                        <th>{{ trans('file.Sale Note') }}</th>
                         @foreach ($custom_fields as $fieldName)
                             <th>{{ $fieldName }}</th>
                         @endforeach
@@ -213,12 +214,12 @@
                         <th>{{ trans('file.Image') }}  1</th>
                         <th>{{ trans('file.Image')  }} 2</th>
                         <th>{{ trans('file.Qty') }}</th>
-                        <th>{{ trans('file.Returned') }}</th>
+                        {{-- <th>{{ trans('file.Returned') }}</th> --}}
                         <th>{{ trans('file.Unit Price') }}</th>
-                        <th>{{ trans('file.Tax') }}</th>
-                        <th>{{ trans('file.Discount') }}</th>
+                        {{-- <th>{{ trans('file.Tax') }}</th>
+                        <th>{{ trans('file.Discount') }}</th> --}}
                         <th>{{ trans('file.Subtotal') }}</th>
-                        <th>{{ trans('file.Delivered') }}</th>
+                        {{-- <th>{{ trans('file.Delivered') }}</th> --}}
                     </thead>
                     <tbody>
                     </tbody>
@@ -543,7 +544,7 @@
                         <div class="col-md-12 form-group">
                             <label>{{ trans('file.Status') }}</label>
                             <select name="status" class="form-control selectpicker">
-                                <option value="0">{{ trans('file.All') }}</option>
+
                                 <option value="1">{{ trans('file.Waiting for Pickup/Delivery') }}</option>
                                 <option value="2">{{ trans('file.Delivering') }}</option>
                                 <option value="3">{{ trans('file.Completed') }}</option>
@@ -569,8 +570,16 @@
                             <input type="text" name="delivered_by" class="form-control">
                         </div>
                         <div class="col-md-6 mt-2 form-group">
+                            <label>{{ trans('file.Ship Code') }}</label>
+                            <input type="text" name="ship_code" class="form-control">
+                        </div>
+                        <div class="col-md-6 mt-2 form-group">
                             <label>{{ trans('file.Recieved By') }} </label>
                             <input type="text" name="recieved_by" class="form-control">
+                        </div>
+                        <div class="col-md-6 mt-2 form-group">
+                            <label>{{ trans('file.Recieved Phone') }} </label>
+                            <input type="text" name="recieved_phone" class="form-control">
                         </div>
                         <div class="col-md-6 form-group">
                             <label>{{ trans('file.customer') }} *</label>
@@ -692,6 +701,9 @@
                 "data": "paid_amount"
             }, {
                 "data": "due"
+            },
+            {
+                "data": "sale_note"
             }
         ];
         var field_name = <?php echo json_encode($field_name); ?>;
@@ -1214,11 +1226,13 @@
                 $('select[name="status"]').val(data[2]);
                 $('.selectpicker').selectpicker('refresh');
                 $('input[name="delivered_by"]').val(data[3]);
-                $('input[name="recieved_by"]').val(data[4]);
-                $('#customer').text(data[5]);
-                $('textarea[name="address"]').val(data[6]);
-                $('textarea[name="note"]').val(data[7]);
-                $('select[name="courier_id"]').val(data[8]);
+                $('input[name="ship_code"]').val(data[4]);
+                $('input[name="recieved_by"]').val(data[5]);
+                $('input[name="recieved_phone"]').val(data[6]);
+                $('#customer').text(data[7]);
+                $('textarea[name="address"]').val(data[8]);
+                $('textarea[name="note"]').val(data[9]);
+                $('select[name="courier_id"]').val(data[10]);
                 $('.selectpicker').selectpicker('refresh');
                 $('input[name="reference_no"]').val(data[0]);
                 $('input[name="sale_id"]').val(id);
@@ -1475,20 +1489,21 @@
         <!-- Thông tin người gửi -->
         <div class="col-md-6">
             <div class="bordered-box customer">
-                <strong>Thông tin người gửi:</strong><br>
-                <strong>Tên công ty:</strong> ${sale[4]}<br>
-                <strong>Email:</strong> ${sale[5]}<br>
-                <strong>Số điện thoại:</strong> ${sale[6]}<br>
-                <strong>Địa chỉ:</strong> ${sale[7]}, ${sale[8]}<br>
+                <strong>Thông tin người gửi </strong><br>
+                <strong>Tên công ty </strong> ${sale[4]}<br>
+                <strong>Email </strong> ${sale[5]}<br>
+                <strong>Số điện thoại </strong> ${sale[6]}<br>
+                <strong>Địa chỉ </strong> ${sale[7]}, ${sale[8]}<br>
             </div>
         </div>
         <!-- Thông tin người nhận -->
         <div class="col-md-6">
             <div class="bordered-box customer">
-                <strong>Thông tin khách hàng:</strong><br>
-                <strong>Tên:</strong> ${sale[9]}<br>
-                <strong>Số điện thoại:</strong> ${sale[10]}<br>
-                <strong>Địa chỉ:</strong> ${sale[12]}, ${sale[13]}<br>
+                <strong>Thông tin khách hàng </strong><br>
+                <strong>Tên </strong> ${sale[9]}<br>
+                <strong>Số điện thoại </strong> ${sale[10]}<br>
+                <strong>Địa chỉ </strong> ${sale[11]}, ${sale[12]}<br>
+                <strong> </strong> <br>
             </div>
         </div>
     </div>
@@ -1496,10 +1511,10 @@
     <div class="row">
         <div class="col-md-12">
             <div class="bordered-box customer">
-                <strong>Thông tin giao hàng:</strong><br>
-                <strong>Tên người nhận:</strong> ${sale[35]}<br>
-                <strong>Địa chỉ:</strong> ${sale[34]}<br>
-                <strong>Đơn vị giao hàng:</strong> ${sale[33]}<br>
+                <strong>Ship Code  </strong> ${sale[38]} <br>
+                <strong>Tên và SDT ngươi nhận </strong> ${sale[36]} - ${sale[37]} <br>
+                <strong>Địa chỉ </strong> ${sale[34]}<br>
+                <strong>Đơn vị giao hàng </strong> ${sale[33]}<br>
                   <strong>{{trans('file.Delivery Status') }}</strong> ${sale[32]}<br>
             </div>
         </div>
@@ -1521,7 +1536,7 @@
                 var subtotal = data[6];
                 var batch_no = data[7];
                 var return_qty = data[8];
-                var is_delivered = data[9];
+                // var is_delivered = data[9];
                 var total_qty = 0;
                 var newBody = $("<tbody>");
                 $.each(name_code, function(index) {
@@ -1532,13 +1547,13 @@
                     cols += '<td>' + sale[38] + '</td>';
                     cols += '<td>' + sale[39] + '</td>';
                     cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
-                    cols += '<td>' + return_qty[index] + '</td>';
+                    // cols += '<td>' + return_qty[index] + '</td>';
                     cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(
                         {{ $general_setting->decimal }}) + '</td>';
-                    cols += '<td>' + tax[index] + '(' + tax_rate[index] + '%)' + '</td>';
-                    cols += '<td>' + discount[index] + '</td>';
+                    // cols += '<td>' + tax[index] + '(' + tax_rate[index] + '%)' + '</td>';
+                    // cols += '<td>' + discount[index] + '</td>';
                     cols += '<td>' + subtotal[index] + '</td>';
-                    cols += '<td>' + is_delivered[index] + '</td>';
+                    // cols += '<td>' + is_delivered[index] + '</td>';
                     total_qty += parseFloat(qty[index]);
                     newRow.append(cols);
                     newBody.append(newRow);
@@ -1546,29 +1561,17 @@
 
                 var newRow = $("<tr>");
                 cols = '';
-                cols += '<td colspan=3><strong>{{ trans('file.Total') }}:</strong></td>';
+                cols += '<td colspan=4><strong>{{ trans('file.Total') }}:</strong></td>';
                 cols += '<td>' + total_qty + '</td>';
-                cols += '<td colspan=2></td>';
-                cols += '<td>' + sale[14] + '</td>';
-                cols += '<td>' + sale[15] + '</td>';
+                cols += '<td colspan=1></td>';
+                // cols += '<td>' + sale[14] + '</td>';
+                // cols += '<td>' + sale[15] + '</td>';
                 cols += '<td>' + sale[16] + '</td>';
-                cols += '<td></td>';
+
                 newRow.append(cols);
                 newBody.append(newRow);
 
-                var newRow = $("<tr>");
-                cols = '';
-                cols += '<td colspan=9><strong>{{ trans('file.Order Tax') }}:</strong></td>';
-                cols += '<td>' + sale[17] + '(' + sale[18] + '%)' + '</td>';
-                newRow.append(cols);
-                newBody.append(newRow);
 
-                var newRow = $("<tr>");
-                cols = '';
-                cols += '<td colspan=9><strong>{{ trans('file.Order Discount') }}:</strong></td>';
-                cols += '<td>' + sale[19] + '</td>';
-                newRow.append(cols);
-                newBody.append(newRow);
                 if (sale[28]) {
                     var newRow = $("<tr>");
                     cols = '';
@@ -1581,28 +1584,28 @@
 
                 var newRow = $("<tr>");
                 cols = '';
-                cols += '<td colspan=9><strong>{{ trans('file.Shipping Cost') }}:</strong></td>';
+                cols += '<td colspan=6><strong>{{ trans('file.Shipping Cost') }}:</strong></td>';
                 cols += '<td>' + sale[20] + '</td>';
                 newRow.append(cols);
                 newBody.append(newRow);
 
                 var newRow = $("<tr>");
                 cols = '';
-                cols += '<td colspan=9><strong>{{ trans('file.grand total') }}:</strong></td>';
+                cols += '<td colspan=6><strong>{{ trans('file.grand total') }}:</strong></td>';
                 cols += '<td>' + sale[21] + '</td>';
                 newRow.append(cols);
                 newBody.append(newRow);
 
                 var newRow = $("<tr>");
                 cols = '';
-                cols += '<td colspan=9><strong>{{ trans('file.Paid Amount') }}:</strong></td>';
+                cols += '<td colspan=6><strong>{{ trans('file.Paid Amount') }}:</strong></td>';
                 cols += '<td>' + sale[22] + '</td>';
                 newRow.append(cols);
                 newBody.append(newRow);
 
                 var newRow = $("<tr>");
                 cols = '';
-                cols += '<td colspan=9><strong>{{ trans('file.Due') }}:</strong></td>';
+                cols += '<td colspan=6><strong>{{ trans('file.Due') }}:</strong></td>';
                 cols += '<td>' + parseFloat(sale[21] - sale[22]).toFixed({{ $general_setting->decimal }}) +
                     '</td>';
                 newRow.append(cols);
@@ -1610,8 +1613,7 @@
 
                 $("table.product-sale-list").append(newBody);
             });
-            var htmlfooter = '</p><p><strong>{{ trans('file.Staff Note') }}:</strong> ' + sale[24] +
-                '</p><strong>{{ trans('file.Created By') }}:</strong><br>' + sale[25] + '<br>' + sale[26];
+            var htmlfooter = '</p><p><strong>{{ trans('file.Staff Note') }}:</strong> ' + sale[24];
             $('#sale-content').html(htmltext);
             $('#sale-footer').html(htmlfooter);
             $('#sale-details').modal('show');

@@ -304,7 +304,7 @@ class QuotationController extends Controller
                     $nestedData['status'] = '<div class="badge badge-danger">' . trans('file.Pending') . '</div>';
                     $status = trans('file.Pending');
                 } else {
-                    $nestedData['status'] = '<div class="badge badge-success">' . trans('file.Sent') . '</div>';
+                    $nestedData['status'] = '<div class="badge badge-success">' . trans('file.Completed') . '</div>';
                     $status = trans('file.Sent');
                 }
 
@@ -370,8 +370,8 @@ class QuotationController extends Controller
                     ' "' . preg_replace('/\s+/S', " ", $quotation->note) . '"',
                     ' "' . $quotation->user->name . '"',
                     ' "' . $quotation->user->email . '"',
-                    ' "<img src=\'' . asset('images/quotation/' . $quotation->document) . '\' alt=\'Image\' height=\'50\'>"',
-                    ' "<img src=\'' . asset('images/quotation/' . $quotation->image) . '\' alt=\'Image\' height=\'50\'>"',
+                    ' "' . ($quotation->document ? '<img src=\'' . asset('images/quotation/' . $quotation->document) . '\' alt=\'Image\' height=\'50\'>' : '') . '"',
+                    ' "' . ($quotation->image ? '<img src=\'' . asset('images/quotation/' . $quotation->image) . '\' alt=\'Image\' height=\'50\'>' : '') . '"',
                     ' "' . $quotation->customer->email . '"',
                     ' "' . $quotation->document . '"]',
 
@@ -484,14 +484,11 @@ class QuotationController extends Controller
                         $paying_method = 'Deposit';
                     elseif ($data['paid_by_id'][$key] == 7) {
                         $paying_method = 'Points';
-
                     } elseif ($data['paid_by_id'][$key] == 8) {
                         $paying_method = 'Pesapal';
                     } else {
                         $paying_method = $data['paid_by_id'][$key]; // For string values like 'Pesapal', 'Stripe', etc.
                     }
-
-
                 }
             }
         }
@@ -947,7 +944,7 @@ class QuotationController extends Controller
             } else
                 $unit = '';
 
-            $product_quotation[0][$key] = $product->name . ' [' . $product->code . ']';
+            $product_quotation[0][$key] = $product->name;
             $product_quotation[1][$key] = $product_quotation_data->qty;
             $product_quotation[2][$key] = $unit;
             $product_quotation[3][$key] = $product_quotation_data->tax;

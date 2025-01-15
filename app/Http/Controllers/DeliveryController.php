@@ -194,26 +194,29 @@ class DeliveryController extends Controller
     public function create($id){
         $lims_delivery_data = Delivery::where('sale_id', $id)->first();
         if($lims_delivery_data){
-            $customer_sale = DB::table('sales')->join('customers', 'sales.customer_id', '=', 'customers.id')->where('sales.id', $id)->select('sales.reference_no','customers.name')->get();
+            $customer_sale = DB::table('sales')->join('customers', 'sales.customer_id', '=', 'customers.id')->where('sales.id', $id)->select('sales.reference_no','customers.name','customers.phone_number' )->get();
 
             $delivery_data[] = $lims_delivery_data->reference_no;
             $delivery_data[] = $customer_sale[0]->reference_no;
             $delivery_data[] = $lims_delivery_data->status;
             $delivery_data[] = $lims_delivery_data->delivered_by;
+            $delivery_data[] = $lims_delivery_data->ship_code;
             $delivery_data[] = $lims_delivery_data->recieved_by;
+            $delivery_data[] = $lims_delivery_data->recieved_phone ;
             $delivery_data[] = $customer_sale[0]->name;
             $delivery_data[] = $lims_delivery_data->address;
             $delivery_data[] = $lims_delivery_data->note;
             $delivery_data[] = $lims_delivery_data->courier_id;
         }
         else{
-            $customer_sale = DB::table('sales')->join('customers', 'sales.customer_id', '=', 'customers.id')->where('sales.id', $id)->select('sales.reference_no','customers.name', 'customers.address', 'customers.city', 'customers.country')->get();
+            $customer_sale = DB::table('sales')->join('customers', 'sales.customer_id', '=', 'customers.id')->where('sales.id', $id)->select('sales.reference_no','customers.name', 'customers.address', 'customers.city', 'customers.country','customers.phone_number')->get();
 
             $delivery_data[] = 'dr-' . date("Ymd") . '-'. date("his");
             $delivery_data[] = $customer_sale[0]->reference_no;
             $delivery_data[] = '';
             $delivery_data[] = '';
             $delivery_data[] = '';
+            $delivery_data[] = $customer_sale[0]->phone_number;
             $delivery_data[] = $customer_sale[0]->name;
             $delivery_data[] = $customer_sale[0]->address.' '.$customer_sale[0]->city.' '.$customer_sale[0]->country;
             $delivery_data[] = '';
@@ -238,6 +241,8 @@ class DeliveryController extends Controller
         $delivery->address = $data['address'];
         $delivery->delivered_by = $data['delivered_by'];
         $delivery->recieved_by = $data['recieved_by'];
+        $delivery->recieved_phone = $data['recieved_phone'];
+        $delivery->ship_code = $data['ship_code'];
         $delivery->status = $data['status'];
         $delivery->note = $data['note'];
         $delivery->save();

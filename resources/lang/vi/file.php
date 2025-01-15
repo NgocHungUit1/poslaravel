@@ -616,6 +616,7 @@ return [
     'Unpaid' => 'Chưa thanh toán',
     'Debt Amount' => 'Còn nợ',
     'Delivery Status' => 'Trạng thái giao hàng',
+    "Recieved Phone" => " Số điện thoại người nhận",
 
 ];
 ?>

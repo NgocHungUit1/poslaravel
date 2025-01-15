@@ -151,8 +151,8 @@
                         <th>{{ trans('file.Image')  }} 2</th>
                         <th>Qty</th>
                         <th>{{ trans('file.Unit Price') }}</th>
-                        <th>{{ trans('file.Tax') }}</th>
-                        <th>{{ trans('file.Discount') }}</th>
+                        {{-- <th>{{ trans('file.Tax') }}</th>
+                        <th>{{ trans('file.Discount') }}</th> --}}
                         <th>{{ trans('file.Subtotal') }}</th>
                     </thead>
                     <tbody>
@@ -508,12 +508,12 @@
         <!-- Thông tin người nhận -->
         <div class="col-md-6">
             <div class="bordered-box customer">
-                <strong>Bên mua:</strong><br>
-                <strong>Tên:</strong> ${quotation[9]}<br>
-                <strong>Email:</strong> ${quotation[30]}<br>
-                <strong>Số điện thoại:</strong> ${quotation[10]}<br>
-                <strong>Địa chỉ:</strong> ${quotation[11]}, ${sale[12]}<br>
-                <strong>Mã số thuế:</strong>NA<br>
+                <strong>Bên mua </strong><br>
+                <strong>Tên </strong> ${quotation[9]}<br>
+                <strong>Email </strong> ${quotation[30]}<br>
+                <strong>Số điện thoại </strong> ${quotation[10]}<br>
+                <strong>Địa chỉ </strong> ${quotation[11]}, ${sale[12]}<br>
+                <strong>Mã số thuế </strong>NA<br>
             </div>
         </div>
         <!-- Thông tin người gửi -->
@@ -523,7 +523,7 @@
                 <strong>Đại diện </strong> Trần Nguyễn Anh Huy<br>
                 <strong>Công ty </strong> Công ty TNHH SX-TM-DV ARES<br>
                 <strong>Địa chỉ </strong> 391/19 Trần Hưng Đạo, P.Cầu Kho,Q1.HCM<br>
-                <strong>Mã số thuế:</strong>0317211560<br>
+                <strong>Mã số thuế </strong>0317211560<br>
 
             </div>
         </div>
@@ -557,8 +557,6 @@
         cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
         cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(
             {{ $general_setting->decimal }}) + '</td>';
-        cols += '<td>' + tax[index] + '(' + tax_rate[index] + '%)' + '</td>';
-        cols += '<td>' + discount[index] + '</td>';
         cols += '<td>' + subtotal[index] + '</td>';
         newRow.append(cols);
         newBody.append(newRow);
@@ -566,7 +564,7 @@
                 // Thêm các dòng tổng
                 var newRow = $("<tr>");
                 cols = '';
-                cols += '<td colspan=6><strong>Tổng cộng chưa VAT:</strong></td>';
+                cols += '<td colspan=4><strong>Tổng cộng chưa VAT:</strong></td>';
                 cols += '<td>' + quotation[14] + '</td>'; // Total tax
                 cols += '<td>' + quotation[15] + '</td>'; // Total discount
                 cols += '<td>' + quotation[16] + '</td>'; // Total price
@@ -577,14 +575,14 @@
              // Tạo hàng chứa tiêu đề "Phương thức thanh toán"
 newRow = $("<tr>");
 cols = '';
-cols += '<td colspan=9 style="font-weight: bold; background-color: #f2f2f2; text-align: left;">Phương thức thanh toán</td>';
+cols += '<td colspan=7 style="font-weight: bold; background-color: #f2f2f2; text-align: left;">Phương thức thanh toán</td>';
 newRow.append(cols);
 newBody.append(newRow);
 
 // Thêm nội dung "Đợt 1"
 newRow = $("<tr>");
 cols = '';
-cols += '<td colspan=8 style="padding-left: 20px;"><strong>Đợt 1: Thanh toán tạm ứng cọc 50% giá trị hợp đồng:</strong></td>';
+cols += '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 1: Thanh toán tạm ứng cọc 50% giá trị đơn đặt hàng:</strong></td>';
 cols += '<td style="text-align: right;">' + quotation[23] + '</td>'; // Paid Amount
 newRow.append(cols);
 newBody.append(newRow);
@@ -592,7 +590,7 @@ newBody.append(newRow);
 // Thêm nội dung "Đợt 2"
 newRow = $("<tr>");
 cols = '';
-cols += '<td colspan=8 style="padding-left: 20px;"><strong>Đợt 2: Thanh toán 50% giá trị còn lại bằng tiền mặt khi nhận hàng (COD) hoặc chuyển khoản thanh toán trước phần còn lại trước khi hàng xuất kho:</strong></td>';
+cols += '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 2: Thanh toán 50% giá trị còn lại bằng tiền mặt khi nhận hàng (COD) hoặc chuyển khoản thanh toán trước phần còn lại trước khi hàng xuất kho:</strong></td>';
 cols += '<td style="text-align: right;">' + quotation[24] + '</td>'; // Paid Amount
 newRow.append(cols);
 newBody.append(newRow);
@@ -638,9 +636,7 @@ newBody.append(newRow);
     <div class="row mt-3">
         <div class="col-md-12">
             <strong>{{ trans('file.Note') }}:</strong> ${quotation[25]}<br><br>
-            <strong>{{ trans('file.Created By') }}:</strong><br>
-            ${quotation[26]}<br> <!-- User name -->
-            ${quotation[27]} <!-- User email -->
+
         </div>
     </div>
     <div class="row mt-3">

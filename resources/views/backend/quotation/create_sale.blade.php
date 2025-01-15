@@ -549,6 +549,8 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <input type="hidden" id="quotation_id" value="{{ $lims_quotation_data->id }}">
+
                                         <input type="submit" value="{{ trans('file.submit') }}"
                                             class="btn btn-primary" id="submit-button">
                                     </div>
@@ -1473,6 +1475,8 @@
 
         $(document).on('submit', '.sale-form', function(e) {
             e.preventDefault(); // Ngăn chặn hành vi submit mặc định
+            var quotationId = $('#quotation_id').val();
+
 
             var rownumber = $('table.order-list tbody tr:last').index();
             if (rownumber < 0) {
@@ -1482,7 +1486,7 @@
 
             // Thu thập dữ liệu form và tệp
             var formData = new FormData(this);
-
+            formData.append('quotation_id', quotationId);
             console.log(formData);
 
 

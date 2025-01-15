@@ -24,14 +24,15 @@
                                                 <label>{{ trans('file.Biller') }} *</label>
                                                 <select required name="biller_id" class="selectpicker form-control"
                                                     data-live-search="true" id="biller-id" title="Select Biller...">
-                                                    @foreach ($lims_biller_list as $biller)
-                                                        <option value="{{ $biller->id }}">
+                                                    @foreach ($lims_biller_list as $index => $biller)
+                                                        <option value="{{ $biller->id }}" {{ $index === 0 ? 'selected' : '' }}>
                                                             {{ $biller->name . ' (' . $biller->company_name . ')' }}
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
+
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>{{ trans('file.Supplier') }}</label>
@@ -101,16 +102,18 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>{{ trans('file.Warehouse') }} *</label>
-                                                <select id="warehouse_id" name="warehouse_id" required
+                                                <select id="warehouse_id" name="warehouse_id"
                                                     class="selectpicker form-control" data-live-search="true"
                                                     title="Select warehouse...">
-                                                    @foreach ($lims_warehouse_list as $warehouse)
-                                                        <option value="{{ $warehouse->id }}">{{ $warehouse->name }}
+                                                    @foreach ($lims_warehouse_list as $index => $warehouse)
+                                                        <option value="{{ $warehouse->id }}" {{ $index === 0 ? 'selected' : '' }}>
+                                                            {{ $warehouse->name }}
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
+
                                         <div class="col-md-12 mt-2">
                                             <label>{{ trans('file.Select Product') }}</label>
                                             <div class="search-box input-group">
@@ -316,9 +319,10 @@
                                                 <div class="form-group">
                                                     <label>Số tiền đặt cọc *</label>
                                                     <input type="number" name="paying_amount[]" class="form-control"
-                                                        id="paying-amount" step="any" />
+                                                        id="paying-amount" step="any" value="0" />
                                                 </div>
                                             </div>
+
                                             <!-- Thay thế input paid_amount hiện tại với: -->
                                             <div class="col-md-4">
                                                 <div class="form-group">
@@ -559,39 +563,48 @@
             });
         });
 
-        $('select[name="warehouse_id"]').on('change', function() {
-            var id = $(this).val();
-            $.get('getproduct/' + id, function(data) {
+        $(document).ready(function () {
+    // Kích hoạt sự kiện change trên select khi trang tải
+    var $warehouseSelect = $('select[name="warehouse_id"]');
+    var id = $warehouseSelect.val(); // Lấy giá trị đầu tiên
 
-                lims_product_array = [];
-                product_code = data[0];
-                product_name = data[1];
-                product_qty = data[2];
-                product_type = data[3];
-                product_id = data[4];
-                product_list = data[5];
-                qty_list = data[6];
-                product_warehouse_price = data[7];
-                expired_date = data[10];
-                is_embeded = data[11];
-                imei_number = data[12];
-                $.each(product_code, function(index) {
-                    lims_product_array.push(product_code[index] + '|' + product_name[index] + '|' +
-                        imei_number[index] + '|' + is_embeded[index]);
-                });
+    if (id) {
+        // Gọi API ngay lập tức
+        $.get('getproduct/' + id, function (data) {
+            lims_product_array = [];
+            product_code = data[0];
+            product_name = data[1];
+            product_qty = data[2];
+            product_type = data[3];
+            product_id = data[4];
+            product_list = data[5];
+            qty_list = data[6];
+            product_warehouse_price = data[7];
+            expired_date = data[10];
+            is_embeded = data[11];
+            imei_number = data[12];
+            $.each(product_code, function (index) {
+                lims_product_array.push(
+                    product_code[index] +
+                    '|' +
+                    product_name[index] +
+                    '|' +
+                    imei_number[index] +
+                    '|' +
+                    is_embeded[index]
+                );
             });
         });
+    }
+});
+
 
         $('#lims_productcodeSearch').on('input', function() {
             var customer_id = $('#customer_id').val();
-            var warehouse_id = $('#warehouse_id').val();
             temp_data = $('#lims_productcodeSearch').val();
             if (!customer_id) {
                 $('#lims_productcodeSearch').val(temp_data.substring(0, temp_data.length - 1));
                 alert('Please select Customer!');
-            } else if (!warehouse_id) {
-                $('#lims_productcodeSearch').val(temp_data.substring(0, temp_data.length - 1));
-                alert('Please select Warehouse!');
             }
         });
 
@@ -605,6 +618,7 @@
                 }));
             },
             response: function(event, ui) {
+
                 if (ui.content.length == 1) {
                     var data = ui.content[0].value;
                     $(this).autocomplete("close");

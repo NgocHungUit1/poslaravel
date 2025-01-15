@@ -59,6 +59,7 @@ use Srmklive\PayPal\Services\AdaptivePayments;
 use GeniusTS\HijriDate\Date;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Currency;
+use App\Models\Quotation;
 use App\Models\SmsTemplate;
 use App\Services\SmsService;
 use App\SMSProviders\TonkraSms;
@@ -331,6 +332,9 @@ class SaleController extends Controller
                     ? date(config('date_format'), strtotime($sale->delivery_date))
                     : 'N/A';
 
+
+
+               $nestedData['sale_note'] = $sale->sale_note;
                 $nestedData['reference_no'] = $sale->reference_no;
                 $nestedData['biller'] = $sale->biller->name;
                 $nestedData['customer'] = $sale->customer->name . '<br>' . $sale->customer->phone_number . '<input type="hidden" class="deposit" value="' . ($sale->customer->deposit - $sale->customer->expense) . '" />' . '<input type="hidden" class="points" value="' . $sale->customer->points . '" />';
@@ -377,6 +381,8 @@ class SaleController extends Controller
                         $nestedData['courier'] = $delivery->courier ? $delivery->courier->name : 'N/A';
                         $nestedData['delivery_by'] = $delivery->delivered_by ?? '';
                         $nestedData['recieved_by'] = $delivery->recieved_by ?? '';
+                        $nestedData['recieved_phone'] = $delivery->recieved_phone ?? '';
+                        $nestedData['ship_code'] = $delivery->ship_code ?? '';
                         $nestedData['address'] = $delivery->address ?? '';
                         $nestedData['note'] = $delivery->note ?? '';
                     }
@@ -415,6 +421,7 @@ class SaleController extends Controller
                 $nestedData['returned_amount'] = number_format($returned_amount, config('decimal'));
                 $nestedData['paid_amount'] = number_format($sale->paid_amount, config('decimal'));
                 $nestedData['due'] = number_format($sale->grand_total - $returned_amount - $sale->paid_amount, config('decimal'));
+
                 //fetching custom fields data
                 foreach ($field_names as $field_name) {
                     $nestedData[$field_name] = $sale->$field_name;
@@ -539,9 +546,11 @@ class SaleController extends Controller
                     ' "' . $nestedData['address'] . '"',
                     ' "' . $nestedData['delivery_by'] . '"',
                     ' "' . $nestedData['recieved_by'] . '"',
+                    ' "' . $nestedData['recieved_phone'] . '"',
+                    ' "' . $nestedData['ship_code'] . '"',
                     ' "' . $nestedData['note'] . '"',
-                    ' "<img src=\'' . asset('documents/sale/' . $sale->document) . '\' alt=\'Image\' height=\'50\'>"',
-                    ' "<img src=\'' . asset('images/sale/' . $sale->image) . '\' alt=\'Image\' height=\'50\'>"',
+                    ' "' . ($sale->document ? '<img src=\'' . asset('documents/sale/' . $sale->document) . '\' alt=\'Image\' height=\'50\'>' : '') . '"',
+                    ' "' . ($sale->image ? '<img src=\'' . asset('images/sale/' . $sale->image) . '\' alt=\'Image\' height=\'50\'>' : '') . '"',
                     ' "' . $sale->exchange_rate . '"]',
 
 
@@ -600,6 +609,12 @@ class SaleController extends Controller
 
     public function store(Request $request)
     {
+        $quotationId = $request->input('quotation_id');
+        $quotation = Quotation::find($quotationId);
+        if ($quotation) {
+            $quotation->quotation_status = 2; // Cập nhật trạng thái mới
+            $quotation->save();
+        }
         $data = $request->all();
         $image = $request->file();
 
@@ -787,6 +802,7 @@ class SaleController extends Controller
         }
         //inserting data to sales table
         // return $data;
+        $data['sale_status'] = 2;
         $lims_sale_data = Sale::create($data);
 
         // add the $new_data variable value to $data['paid_amount'] variable
