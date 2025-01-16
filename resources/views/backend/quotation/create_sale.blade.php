@@ -405,8 +405,9 @@
                                             <div class="form-group">
                                                 <label>{{ trans('file.Sale Status') }} *</label>
                                                 <select name="sale_status" class="form-control">
-                                                    <option value="1">{{ trans('file.Completed') }}</option>
                                                     <option value="2">{{ trans('file.Pending') }}</option>
+                                                    <option value="1">{{ trans('file.Completed') }}</option>
+
                                                 </select>
                                             </div>
                                         </div>

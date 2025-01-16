@@ -137,7 +137,7 @@
                         <th>{{ trans('file.Payment Method') }}</th>
                         <th>{{ trans('file.Delivery Status') }}</th>
                         <th>{{ trans('file.grand total') }}</th>
-                        <th>{{ trans('file.Returned Amount') }}</th>
+                        {{-- <th>{{ trans('file.Returned Amount') }}</th> --}}
                         <th>{{ trans('file.Paid') }}</th>
                         <th>{{ trans('file.Due') }}</th>
                         <th>{{ trans('file.Sale Note') }}</th>
@@ -545,14 +545,10 @@
                             <label>{{ trans('file.Status') }}</label>
                             <select name="status" class="form-control selectpicker">
 
-                                <option value="1">{{ trans('file.Waiting for Pickup/Delivery') }}</option>
-                                <option value="2">{{ trans('file.Delivering') }}</option>
+                                <option value="1">{{ trans('file.Delivered') }}</option>
+                                <option value="2">{{ trans('file.Successful Delivery') }}</option>
                                 <option value="3">{{ trans('file.Completed') }}</option>
-                                <option value="4">{{ trans('file.Cancelled') }}</option>
-                                <option value="5">{{ trans('file.Failed') }}</option>
-                                <option value="6">{{ trans('file.Waiting for COD') }}</option>
-                                <option value="7">{{ trans('file.Paid') }}</option>
-                                <option value="8">{{ trans('file.Unpaid') }}</option>
+
                             </select>
                         </div>
 
@@ -569,13 +565,18 @@
                             <label>{{ trans('file.Delivered By') }}</label>
                             <input type="text" name="delivered_by" class="form-control">
                         </div>
-                        <div class="col-md-6 mt-2 form-group">
-                            <label>{{ trans('file.Ship Code') }}</label>
-                            <input type="text" name="ship_code" class="form-control">
-                        </div>
+
                         <div class="col-md-6 mt-2 form-group">
                             <label>{{ trans('file.Recieved By') }} </label>
                             <input type="text" name="recieved_by" class="form-control">
+                        </div>
+                        <div class="col-md-6 mt-2 form-group">
+                            <label>{{ trans('file.Due') }}</label>
+                            <input type="text" name="due" class="form-control">
+                        </div>
+                        <div class="col-md-6 mt-2 form-group">
+                            <label>{{ trans('file.Ship Code') }}</label>
+                            <input type="text" name="ship_code" class="form-control">
                         </div>
                         <div class="col-md-6 mt-2 form-group">
                             <label>{{ trans('file.Recieved Phone') }} </label>
@@ -695,8 +696,6 @@
                 "data": "delivery_status"
             }, {
                 "data": "grand_total"
-            }, {
-                "data": "returned_amount"
             }, {
                 "data": "paid_amount"
             }, {
@@ -1227,6 +1226,7 @@
                 $('.selectpicker').selectpicker('refresh');
                 $('input[name="delivered_by"]').val(data[3]);
                 $('input[name="ship_code"]').val(data[4]);
+                $('input[name="due"]').val(data[11]);
                 $('input[name="recieved_by"]').val(data[5]);
                 $('input[name="recieved_phone"]').val(data[6]);
                 $('#customer').text(data[7]);
@@ -1502,7 +1502,7 @@
                 <strong>Thông tin khách hàng </strong><br>
                 <strong>Tên </strong> ${sale[9]}<br>
                 <strong>Số điện thoại </strong> ${sale[10]}<br>
-                <strong>Địa chỉ </strong> ${sale[11]}, ${sale[12]}<br>
+                <strong>Địa chỉ </strong> ${sale[11]} , ${sale[12]}<br>
                 <strong> </strong> <br>
             </div>
         </div>
@@ -1511,7 +1511,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="bordered-box customer">
-                <strong>Ship Code  </strong> ${sale[38]} <br>
+                <strong>Thông tin giao hàng </strong> ${sale[38]} <br>
                 <strong>Tên và SDT ngươi nhận </strong> ${sale[36]} - ${sale[37]} <br>
                 <strong>Địa chỉ </strong> ${sale[34]}<br>
                 <strong>Đơn vị giao hàng </strong> ${sale[33]}<br>
@@ -1544,8 +1544,8 @@
                     var cols = '';
                     cols += '<td><strong>' + (index + 1) + '</strong></td>';
                     cols += '<td>' + name_code[index] + '</td>';
-                    cols += '<td>' + sale[38] + '</td>';
-                    cols += '<td>' + sale[39] + '</td>';
+                    cols += '<td>' + sale[40] + '</td>';
+                    cols += '<td>' + sale[41] + '</td>';
                     cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
                     // cols += '<td>' + return_qty[index] + '</td>';
                     cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(

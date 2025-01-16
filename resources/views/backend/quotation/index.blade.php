@@ -512,7 +512,7 @@
                 <strong>Tên </strong> ${quotation[9]}<br>
                 <strong>Email </strong> ${quotation[30]}<br>
                 <strong>Số điện thoại </strong> ${quotation[10]}<br>
-                <strong>Địa chỉ </strong> ${quotation[11]}, ${sale[12]}<br>
+                <strong>Địa chỉ </strong> ${quotation[11]}, ${quotation[12]}<br>
                 <strong>Mã số thuế </strong>NA<br>
             </div>
         </div>

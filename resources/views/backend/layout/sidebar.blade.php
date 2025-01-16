@@ -79,11 +79,11 @@
                 @if($sale_add_permission_active)
                 <li><a href="{{route('sale.pos')}}">POS</a></li>
                 <li id="sale-create-menu"><a href="{{route('sales.create')}}">{{trans('file.Add Sale')}}</a></li>
-                <li id="sale-import-menu"><a href="{{url('sales/sale_by_csv')}}">{{trans('file.Import Sale By CSV')}}</a></li>
+                {{-- <li id="sale-import-menu"><a href="{{url('sales/sale_by_csv')}}">{{trans('file.Import Sale By CSV')}}</a></li> --}}
                 @endif
                 @if($packing_slip_challan_active)
-                <li id="packing-list-menu"><a href="{{route('packingSlip.index')}}">{{trans('file.Packing Slip List')}}</a></li>
-                <li id="challan-list-menu"><a href="{{route('challan.index')}}">{{trans('file.Challan List')}}</a></li>
+                {{-- <li id="packing-list-menu"><a href="{{route('packingSlip.index')}}">{{trans('file.Packing Slip List')}}</a></li>
+                <li id="challan-list-menu"><a href="{{route('challan.index')}}">{{trans('file.Challan List')}}</a></li> --}}
                 @endif
                 @if($delivery_permission_active)
                 <li id="delivery-menu"><a href="{{route('delivery.index')}}">{{trans('file.Delivery List')}}</a></li>
@@ -95,6 +95,22 @@
                 <li id="coupon-menu"><a href="{{route('coupons.index')}}">{{trans('file.Coupon List')}}</a> </li>
                 @endif
                 <li id="courier-menu"><a href="{{route('couriers.index')}}">{{trans('file.Courier List')}}</a> </li>
+            </ul>
+            </li>
+            @endif
+            <?php
+            $index_permission_active = $role_has_permissions_list->where('name', 'quotes-index')->first();
+            ?>
+            @if($index_permission_active)
+            <li><a href="#quotation" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-document"></i><span>{{trans('file.Quotation')}}</span><span></a>
+            <ul id="quotation" class="collapse list-unstyled ">
+                <li id="quotation-list-menu"><a href="{{route('quotations.index')}}">{{trans('file.Quotation List')}}</a></li>
+                <?php
+                $add_permission_active = $role_has_permissions_list->where('name', 'quotes-add')->first();
+                ?>
+                @if($add_permission_active)
+                <li id="quotation-create-menu"><a href="{{route('quotations.create')}}">{{trans('file.Add Quotation')}}</a></li>
+                @endif
             </ul>
             </li>
             @endif
@@ -139,22 +155,7 @@
             </ul>
             </li>
             @endif
-            <?php
-            $index_permission_active = $role_has_permissions_list->where('name', 'quotes-index')->first();
-            ?>
-            @if($index_permission_active)
-            <li><a href="#quotation" aria-expanded="false" data-toggle="collapse"> <i class="dripicons-document"></i><span>{{trans('file.Quotation')}}</span><span></a>
-            <ul id="quotation" class="collapse list-unstyled ">
-                <li id="quotation-list-menu"><a href="{{route('quotations.index')}}">{{trans('file.Quotation List')}}</a></li>
-                <?php
-                $add_permission_active = $role_has_permissions_list->where('name', 'quotes-add')->first();
-                ?>
-                @if($add_permission_active)
-                <li id="quotation-create-menu"><a href="{{route('quotations.create')}}">{{trans('file.Add Quotation')}}</a></li>
-                @endif
-            </ul>
-            </li>
-            @endif
+
             <?php
             $index_permission_active = $role_has_permissions_list->where('name', 'transfers-index')->first();
             ?>

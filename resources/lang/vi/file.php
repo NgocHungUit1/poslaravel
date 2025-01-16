@@ -383,7 +383,7 @@ return [
 	"Update Deposit" => "Cập nhật tiền gửi",
 	"Add Customer Group" => "Thêm nhóm khách hàng",
 	"Delivered By" => "Giao bởi",
-	"Recieved By" => "Nhận bởi",
+	"Recieved By" => "Tên người nhận",
 	"Update Delivery" => "Cập nhật giao hàng",
 	"Update Expense Category" => "Cập nhật danh mục chi phí",
 		"Tax Rate" => "Thuế suất",
@@ -616,7 +616,10 @@ return [
     'Unpaid' => 'Chưa thanh toán',
     'Debt Amount' => 'Còn nợ',
     'Delivery Status' => 'Trạng thái giao hàng',
-    "Recieved Phone" => " Số điện thoại người nhận",
+    "Recieved Phone" => " SĐT người nhận",
+    "Delivery Date" => "Ngày giao hàng",
+    "Ship Code" => "Mã vận đơn",
+    "Successful Delivery" => "Giao hàng thành công",
 
 ];
 ?>

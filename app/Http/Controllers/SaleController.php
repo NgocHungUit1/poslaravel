@@ -374,10 +374,13 @@ class SaleController extends Controller
                     $nestedData['courier'] = 'N/A';
                     $nestedData['delivery_by'] = '';
                     $nestedData['recieved_by'] = '';
+                    $nestedData['recieved_phone'] = '';
+                    $nestedData['ship_code'] = '';
                     $nestedData['address'] = '';
                     $nestedData['note'] = '';
                 } else {
                     foreach ($deliveries as $delivery) {
+
                         $nestedData['courier'] = $delivery->courier ? $delivery->courier->name : 'N/A';
                         $nestedData['delivery_by'] = $delivery->delivered_by ?? '';
                         $nestedData['recieved_by'] = $delivery->recieved_by ?? '';
@@ -662,7 +665,7 @@ class SaleController extends Controller
 
         if ($data['pos']) {
             if (!isset($data['reference_no']))
-                $data['reference_no'] = 'posr-' . date("Ymd") . '-' . date("his");
+                $data['reference_no'] = 'ar-' . date("Ymd") . '-' . date("his");
 
             foreach ($new_data['paid_amount'] as $paid_amount) {
                 $balance = $data['grand_total'] - $paid_amount;
@@ -685,7 +688,7 @@ class SaleController extends Controller
             }
         } else {
             if (!isset($data['reference_no']))
-                $data['reference_no'] = 'sr-' . date("Ymd") . '-' . date("his");
+                $data['reference_no'] = 'ar-' . date("Ymd") . '-' . date("his");
         }
 
         // Xử lý document
@@ -2118,7 +2121,7 @@ class SaleController extends Controller
         }
         //return $unit;
         $data = $request->except('document');
-        $data['reference_no'] = 'sr-' . date("Ymd") . '-' . date("his");
+        $data['reference_no'] = 'ar-' . date("Ymd") . '-' . date("his");
         $data['user_id'] = Auth::user()->id;
         $document = $request->document;
         if ($document) {

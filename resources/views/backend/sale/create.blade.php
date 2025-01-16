@@ -72,6 +72,12 @@
                                                 @endforeach
                                                 </select>
                                                 <button type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#addCustomer"><i class="dripicons-plus"></i></button>
+                                                <button type="button" id="editCustomerBtn" class="btn btn-default btn-sm" data-toggle="modal" data-target="#editCustomerModal">
+                                                    <i class="dripicons-document-edit"></i>
+                                                </button>
+
+
+
                                                 @else
                                                 <select required name="customer_id" id="customer_id" class="selectpicker form-control" data-live-search="true" title="Select customer...">
                                                 @foreach($lims_customer_list as $customer)
@@ -628,6 +634,77 @@
           </div>
         </div>
     </div>
+
+    <!-- Edit customer modal -->
+    <div id="editCustomerModal" class="modal fade text-left" tabindex="-1" role="dialog">
+        <div role="document" class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="edit-customer-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ trans('file.Edit Customer') }}</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="italic">
+                            <small>{{ trans('file.The field labels marked with * are required input fields') }}.</small>
+                        </p>
+                        <input type="hidden" name="customer_id" id="edit-customer-id">
+
+                        <!-- Customer Group -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Customer Group') }} *</label>
+                            <select required class="form-control selectpicker" name="customer_group_id" id="edit-customer-group-id">
+                                @foreach($lims_customer_group_all as $customer_group)
+                                    <option value="{{ $customer_group->id }}">{{ $customer_group->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Name -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Name') }} *</label>
+                            <input type="text" name="customer_name" id="edit-customer-name" class="form-control" required>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Email') }}</label>
+                            <input type="email" name="email" id="edit-customer-email" class="form-control" placeholder="example@example.com">
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Phone Number') }}</label>
+                            <input type="text" name="phone_number" id="edit-customer-phone" class="form-control">
+                        </div>
+
+                        <!-- Address -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Address') }}</label>
+                            <input type="text" name="address" id="edit-customer-address" class="form-control">
+                        </div>
+
+                        <!-- City -->
+                        <div class="form-group">
+                            <label>{{ trans('file.City') }}</label>
+                            <input type="text" name="city" id="edit-customer-city" class="form-control">
+                        </div>
+
+                        <!-- Add more fields if needed -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">{{ trans('file.Save') }}</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans('file.Close') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
     <!-- add cash register modal -->
     <div id="cash-register-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" class="modal fade text-left">
         <div role="document" class="modal-dialog">
@@ -1739,6 +1816,49 @@ document.addEventListener('DOMContentLoaded', function() {
         // Gán giá trị ngày hiện tại cho input
         document.getElementById('created_at').value = formattedDate;
     });
+
+    document.getElementById('editCustomerBtn').addEventListener('click', function () {
+    const customerId = document.getElementById('customer_id').value;
+
+    if (!customerId) {
+        alert('Vui lòng chọn khách hàng trước khi chỉnh sửa!');
+        return;
+    }
+
+
+    // Fetch customer details and populate the modal
+    $.get(`/customer/${customerId}`, function (data) {
+        $('#edit-customer-id').val(data.id);
+        $('#edit-customer-name').val(data.name);
+        $('#edit-customer-phone').val(data.phone_number);
+        $('#editCustomerModal').modal('show');
+    });
+});
+
+$('#edit-customer-form').on('submit', function (e) {
+    e.preventDefault();
+
+    const formData = $(this).serialize();
+    const customerId = $('#edit-customer-id').val();
+
+    $.ajax({
+        url: `/customer/${customerId}`,
+        type: 'PUT',
+        data: formData,
+        success: function (response) {
+            // Handle success (e.g., show a success message, update the UI)
+            alert('Customer updated successfully!');
+            $('#editCustomerModal').modal('hide');
+            // Optionally reload a specific part of the page
+            location.reload(); // Remove this if you don't want to reload
+        },
+        error: function (xhr) {
+            // Handle errors
+            alert('Failed to update customer!');
+        }
+    });
+});
+
 
 </script>
 <script type="text/javascript" src="https://js.stripe.com/v3/"></script>

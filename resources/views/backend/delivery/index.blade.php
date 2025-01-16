@@ -24,6 +24,7 @@
                         <th>{{ trans('file.Address') }}</th>
                         <th>{{ trans('file.Products') }}</th>
                         <th>{{ trans('file.grand total') }}</th>
+                        <th>{{ trans('file.Due') }}</th>
                         <th>{{ trans('file.Status') }}</th>
                         <th class="not-exported">{{ trans('file.action') }}</th>
                     </tr>
@@ -34,7 +35,7 @@
                         $customer_sale = DB::table('sales')
                             ->join('customers', 'sales.customer_id', '=', 'customers.id')
                             ->where('sales.id', $delivery->sale_id)
-                            ->select('sales.reference_no', 'customers.name', 'customers.phone_number', 'customers.city', 'sales.grand_total')
+                            ->select('sales.reference_no', 'customers.name', 'customers.phone_number', 'customers.city', 'sales.grand_total', 'sales.paid_amount')
                             ->get();
 
                         $product_names = DB::table('sales')
@@ -56,29 +57,15 @@
                                 $status = trans('file.All');
                                 break;
                             case 1:
-                                $status = trans('file.Waiting for Pickup/Delivery');
+                                $status = trans('file.Delivered');
                                 break;
                             case 2:
-                                $status = trans('file.Delivering');
+                                $status = trans('file.Successful Delivery');
                                 break;
                             case 3:
                                 $status = trans('file.Completed');
                                 break;
-                            case 4:
-                                $status = trans('file.Cancelled');
-                                break;
-                            case 5:
-                                $status = trans('file.Failed');
-                                break;
-                            case 6:
-                                $status = trans('file.Waiting for COD');
-                                break;
-                            case 7:
-                                $status = trans('file.Paid');
-                                break;
-                            case 8:
-                                $status = trans('file.Unpaid');
-                                break;
+
                             default:
                                 $status = trans('file.Unknown Status'); // Trạng thái không xác định
                                 break;
@@ -88,7 +75,7 @@
                         ?>
                         @if ($delivery->sale)
                             <tr class="delivery-link" data-barcode="{{ $barcode }}"
-                                data-delivery='["{{ date($general_setting->date_format, strtotime($delivery->created_at->toDateString())) }}", "{{ $delivery->reference_no }}", "{{ $delivery->sale->reference_no }}", "{{ $status }}", "{{ $delivery->id }}", "{{ $delivery->sale->customer->name }}", "{{ $delivery->sale->customer->phone_number }}", "{{ $delivery->sale->customer->address }}", "{{ $delivery->sale->customer->city }}", "{{ $delivery->note }}", "{{ $delivery->user->name }}", "{{ $delivery->delivered_by }}", "{{ $delivery->recieved_by }}"]'>
+                                data-delivery='["{{ date($general_setting->date_format, strtotime($delivery->created_at->toDateString())) }}", "{{ $delivery->reference_no }}", "{{ $delivery->sale->reference_no }}", "{{ $status }}", "{{ $delivery->id }}", "{{ $delivery->sale->customer->name }}", "{{ $delivery->sale->customer->phone_number }}", "{{ $delivery->sale->customer->address }}", "{{ $delivery->sale->customer->city }}", "{{ $delivery->note }}", "{{ $delivery->user->name }}", "{{ $delivery->delivered_by }}", "{{ $delivery->recieved_by }}","{{ $delivery->recieved_phone }}","{{ $delivery->ship_code }}"]'>
                                 <td>{{ $key }}</td>
                                 <td>{{ $delivery->reference_no }}</td>
                                 <td>{{ $customer_sale[0]->reference_no }}</td>
@@ -102,6 +89,13 @@
                                 <td>{{ $delivery->address }}</td>
                                 <td>{{ implode(',', $product_names) }}</td>
                                 <td>{{ number_format($customer_sale[0]->grand_total, 2) }}</td>
+                                {{-- Tính nợ --}}
+        @php
+        $returned_amount = DB::table('returns')->where('sale_id', $delivery->sale->id)->sum('grand_total');
+        $due = $customer_sale[0]->grand_total - $returned_amount - $customer_sale[0]->paid_amount;
+    @endphp
+    <td>{{ number_format($due, 2, ',', '.') }}</td>
+
                                 <td>
                                     @switch($delivery->status)
                                         @case(0)
@@ -259,15 +253,10 @@
                         <div class="col-md-12 form-group">
                             <label>{{ trans('file.Status') }} *</label>
                             <select name="status" class="form-control selectpicker">
-                                <option value="0">{{ trans('file.All') }}</option>
-                                <option value="1">{{ trans('file.Waiting for Pickup/Delivery') }}</option>
-                                <option value="2">{{ trans('file.Delivering') }}</option>
+                                <option value="1">{{ trans('file.Delivered') }}</option>
+                                <option value="2">{{ trans('file.Successful Delivery') }}</option>
                                 <option value="3">{{ trans('file.Completed') }}</option>
-                                <option value="4">{{ trans('file.Cancelled') }}</option>
-                                <option value="5">{{ trans('file.Failed') }}</option>
-                                <option value="6">{{ trans('file.Waiting for COD') }}</option>
-                                <option value="7">{{ trans('file.Paid') }}</option>
-                                <option value="8">{{ trans('file.Unpaid') }}</option>
+
                             </select>
                         </div>
                         <div class="col-md-6 form-group">
@@ -354,15 +343,18 @@
 
         $(document).on("click", "tr.delivery-link td:not(:first-child, :last-child)", function() {
     var delivery = $(this).parent().data('delivery');
+
     var barcode = $(this).parent().data('barcode');
     deliveryDetails(delivery, barcode);
 });
 
         function deliveryDetails(delivery, barcode) {
+console.log(delivery);
             $('input[name="delivery_id"]').val(delivery[4]);
             $("#delivery-content tbody").remove();
             var newBody = $("<tbody>");
             var rows = '';
+            rows += '<tr><td>Mã Vận Đơn</td><td>' + delivery[14] + '</td></tr>';
             rows += '<tr><td>Date</td><td>' + delivery[0] + '</td></tr>';
             rows += '<tr><td>Delivery Reference</td><td>' + delivery[1] + '</td></tr>';
             rows += '<tr><td>Sale Reference</td><td>' + delivery[2] + '</td></tr>';
@@ -398,9 +390,9 @@
                 $("table.product-delivery-list").append(newBody);
             });
 
-            var htmlfooter = '<div class="col-md-4 form-group"><p>Prepared By: ' + delivery[10] + '</p></div>';
+            var htmlfooter = '<div class="col-md-4 form-group"><p>Recieved Phone: ' + delivery[13] + '</p></div>';
+            htmlfooter += '<div class="col-md-4 form-group"><p>Recieved By: ' + delivery[12]   + '</p></div>';
             htmlfooter += '<div class="col-md-4 form-group"><p>Delivered By: ' + delivery[11] + '</p></div>';
-            htmlfooter += '<div class="col-md-4 form-group"><p>Recieved By: ' + delivery[12] + '</p></div>';
             htmlfooter += '<br><br>';
             htmlfooter +=
                 '<div class="col-md-2 offset-md-5"><img style="max-width:850px;height:100%;max-height:130px" src="data:image/png;base64,' +
@@ -435,157 +427,19 @@
             });
         });
 
-        // $('#delivery-table').DataTable({
-        //     "processing": true,
-        //     "serverSide": true,
-        //     "order": [],
-        //     "ajax": {
-        //         url: "delivery/delivery_list_data",
-        //         dataType: "json",
-        //         type: "get",
-        //     },
-        //     "columns": [{
-        //             "data": "key"
-        //         },
-        //         {
-        //             "data": "reference_no"
-        //         },
-        //         {
-        //             "data": "sale_reference"
-        //         },
-        //         {
-        //             "data": "packing_slip_references"
-        //         },
-        //         {
-        //             "data": "customer"
-        //         },
-        //         {
-        //             "data": "courier"
-        //         },
-        //         {
-        //             "data": "address"
-        //         },
-        //         {
-        //             "data": "products"
-        //         },
-        //         {
-        //             "data": "grand_total"
-        //         },
-        //         {
-        //             "data": "status"
-        //         },
-        //         {
-        //             "data": "options"
-        //         },
-        //     ],
-        //     'language': {
-        //         'lengthMenu': '_MENU_ {{ trans('file.records per page') }}',
-        //         "info": '<small>{{ trans('file.Showing') }} _START_ - _END_ (_TOTAL_)</small>',
-        //         "search": '{{ trans('file.Search') }}',
-        //         'paginate': {
-        //             'previous': '<i class="dripicons-chevron-left"></i>',
-        //             'next': '<i class="dripicons-chevron-right"></i>'
-        //         }
-        //     },
-        //     'columnDefs': [{
-        //             "orderable": false,
-        //             'targets': [0, 6]
-        //         },
-        //         {
-        //             'render': function(data, type, row, meta) {
-        //                 if (type === 'display') {
-        //                     data =
-        //                         '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>';
-        //                 }
 
-        //                 return data;
-        //             },
-        //             'checkboxes': {
-        //                 'selectRow': true,
-        //                 'selectAllRender': '<div class="checkbox"><input type="checkbox" class="dt-checkboxes"><label></label></div>'
-        //             },
-        //             'targets': [0]
-        //         }
-        //     ],
-        //     'select': {
-        //         style: 'multi',
-        //         selector: 'td:first-child'
-        //     },
-        //     'lengthMenu': [
-        //         [10, 25, 50, -1],
-        //         [10, 25, 50, "All"]
-        //     ],
-        //     dom: '<"row"lfB>rtip',
-        //     buttons: [{
-        //             extend: 'pdf',
-        //             text: '<i title="export to pdf" class="fa fa-file-pdf-o"></i>',
-        //             exportOptions: {
-        //                 columns: ':visible:Not(.not-exported)',
-        //                 rows: ':visible'
-        //             },
-        //         },
-        //         {
-        //             extend: 'excel',
-        //             text: '<i title="export to excel" class="dripicons-document-new"></i>',
-        //             exportOptions: {
-        //                 columns: ':visible:Not(.not-exported)',
-        //                 rows: ':visible'
-        //             },
-        //         },
-        //         {
-        //             extend: 'csv',
-        //             text: '<i title="export to csv" class="fa fa-file-text-o"></i>',
-        //             exportOptions: {
-        //                 columns: ':visible:Not(.not-exported)',
-        //                 rows: ':visible'
-        //             },
-        //         },
-        //         {
-        //             extend: 'print',
-        //             text: '<i title="print" class="fa fa-print"></i>',
-        //             exportOptions: {
-        //                 columns: ':visible:Not(.not-exported)',
-        //                 rows: ':visible'
-        //             },
-        //         },
-        //         {
-        //             text: '<i title="delete" class="dripicons-cross"></i>',
-        //             className: 'buttons-delete',
-        //             action: function(e, dt, node, config) {
-        //                 if (user_verified == '1') {
-        //                     delivery_id.length = 0;
-        //                     $(':checkbox:checked').each(function(i) {
-        //                         if (i) {
-        //                             delivery_id[i - 1] = $(this).closest('tr').data('id');
-        //                         }
-        //                     });
-        //                     if (delivery_id.length && confirm("Are you sure want to delete?")) {
-        //                         $.ajax({
-        //                             type: 'POST',
-        //                             url: 'delivery/deletebyselection',
-        //                             data: {
-        //                                 deliveryIdArray: delivery_id
-        //                             },
-        //                             success: function(data) {
-        //                                 alert(data);
-        //                             }
-        //                         });
-        //                         dt.rows({
-        //                             page: 'current',
-        //                             selected: true
-        //                         }).remove().draw(false);
-        //                     } else if (!delivery_id.length)
-        //                         alert('Nothing is selected!');
-        //                 } else
-        //                     alert('This feature is disable for demo!');
-        //             }
-        //         },
-        //         {
-        //             extend: 'colvis',
-        //             text: '<i title="column visibility" class="fa fa-eye"></i>',
-        //             columns: ':gt(0)'
-        //         },
-        //     ],
-        // });
+        $(document).ready(function() {
+            $('#delivery-table').DataTable({
+
+            });
+        });
+
     </script>
+    <style>
+        #delivery-table_paginate {
+    margin-left: 500px;
+
+}
+
+        </style>
 @endpush
