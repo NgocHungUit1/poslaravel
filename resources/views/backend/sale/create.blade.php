@@ -281,7 +281,7 @@
 
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{trans('file.Attach Document')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
+                                            <label>{{trans('file.Image')}} 1</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
                                             <input type="file" name="document" class="form-control" />
                                             @if($errors->has('extension'))
                                                 <span>
@@ -292,7 +292,7 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{trans('file.Image')}}</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
+                                            <label>{{trans('file.Image')}} 2</label> <i class="dripicons-question" data-toggle="tooltip" title="Only jpg, jpeg, png, gif, pdf, csv, docx, xlsx and txt file is supported"></i>
                                             <input type="file" name="image" class="form-control" />
                                             @if($errors->has('extension'))
                                                 <span>
@@ -369,76 +369,59 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>{{trans('file.Payment Status')}} *</label>
+                                            <label>{{ trans('file.Payment Status') }} *</label>
                                             <select name="payment_status" class="form-control">
-                                                <option value="1">{{trans('file.Pending')}}</option>
-                                                <option value="2">{{trans('file.Due')}}</option>
-                                                <option value="3">{{trans('file.Partial')}}</option>
-                                                <option value="4">{{trans('file.Paid')}}</option>
+                                                <option value="1">{{ trans('file.Pending') }}</option>
+                                                <option value="2">{{ trans('file.Due') }}</option>
+                                                <option value="3" selected>{{ trans('file.Partial') }}</option>
+                                                <option value="4">{{ trans('file.Paid') }}</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
-                                <div id="payment">
+                                {{-- <div id="payment"> --}}
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label>{{trans('file.Paid By')}}</label>
+                                                <label>{{ trans('file.Paid By') }}</label>
                                                 <select name="paid_by_id[]" class="form-control">
-                                                    @if(in_array("cash",$options))
+
                                                     <option value="1">Cash</option>
-                                                    @endif
-                                                    @if(in_array("gift_card",$options))
-                                                    <option value="2">Gift Card</option>
-                                                    @endif
-                                                    @if(in_array("card",$options))
                                                     <option value="3">Credit Card</option>
-                                                    @endif
-                                                    @if(in_array("cheque",$options))
-                                                    <option value="4">Cheque</option>
-                                                    @endif
-                                                    @if(in_array("paypal",$options) && (strlen($lims_pos_setting_data->paypal_live_api_username)>0) && (strlen($lims_pos_setting_data->paypal_live_api_password)>0) && (strlen($lims_pos_setting_data->paypal_live_api_secret)>0))
                                                     <option value="5">Paypal</option>
-                                                    @endif
-                                                    @if(in_array("deposit",$options))
-                                                    <option value="6">Deposit</option>
-                                                    @endif
-                                                    @if($lims_reward_point_setting_data && $lims_reward_point_setting_data->is_active)
-                                                    <option value="7">Points</option>
-                                                    @endif
-                                                    @if(in_array("pesapal",$options))
-                                                    <option value="8">Pesapal</option>
-                                                    @endif
-                                                    @foreach($options as $option)
-                                                        @if($option !== 'cash' && $option !== 'card' && $option !== 'card' && $option !== 'cheque' && $option !== 'gift_card' && $option !== 'deposit' && $option !== 'paypal' && $option !== 'pesapal')
-                                                            <option value="{{$option}}">{{$option}}</option>
-                                                        @endif
-                                                    @endforeach
+
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label>{{trans('file.Recieved Amount')}} *</label>
-                                                <input type="number" name="paying_amount[]" class="form-control" id="paying-amount" step="any" />
+                                                <label>Số tiền đặt cọc *</label>
+                                                <input type="number" name="paying_amount[]" class="form-control"
+                                                    id="paying-amount" step="any" value="0" />
                                             </div>
                                         </div>
+
+                                        <!-- Thay thế input paid_amount hiện tại với: -->
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label>{{trans('file.Paying Amount')}} *</label>
-                                                <input type="number" name="paid_amount[]" class="form-control" id="paid-amount" step="any"/>
+                                                <label>Số tiền còn lại cần thanh toán *</label>
+                                                <input type="number" name="paid_amount[]" class="form-control"
+                                                    id="paid-amount" step="any" readonly />
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+
+                                        <div class="col-md-4 d-none">
                                             <div class="form-group">
-                                                <label>{{trans('file.Payment Receiver')}}</label>
-                                                <input type="text" name="payment_receiver" class="form-control" id="payment-receiver"/>
+                                                <label>{{ trans('file.Payment Receiver') }}</label>
+                                                <input type="text" name="payment_receiver" class="form-control"
+                                                    id="payment-receiver" />
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 d-none">
                                             <div class="form-group">
-                                                <label>{{trans('file.Change')}}</label>
-                                                <p id="change" class="ml-2">{{number_format(0, $general_setting->decimal, '.', '')}}</p>
+                                                <label>{{ trans('file.Change') }}</label>
+                                                <p id="change" class="ml-2">
+                                                    {{ number_format(0, $general_setting->decimal, '.', '') }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -451,29 +434,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row" id="gift-card">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label> {{trans('file.Gift Card')}} *</label>
-                                                <select id="gift_card_id" name="gift_card_id" class="selectpicker form-control" data-live-search="true" data-live-search-style="begins" title="Select Gift Card..."></select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row" id="cheque">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>{{trans('file.Cheque Number')}} *</label>
-                                                <input type="text" name="cheque_no" class="form-control">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <label>{{trans('file.Payment Note')}}</label>
-                                            <textarea rows="3" class="form-control" name="payment_note"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
+
+
+                                {{-- </div> --}}
                                 <div class="row mt-2">
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -789,21 +752,36 @@
     });
 
     $('.customer-submit-btn').on("click", function() {
-        $.ajax({
-            type:'POST',
-            url:'{{route('customer.store')}}',
-            data: $("#customer-form").serialize(),
-            success:function(response) {
-                key = response['id'];
-                value = response['name']+' ['+response['phone_number']+']';
-                $('select[name="customer_id"]').append('<option value="'+ key +'">'+ value +'</option>');
-                $('select[name="customer_id"]').val(key);
-                $('.selectpicker').selectpicker('refresh');
-                $("#addCustomer").modal('hide');
-                setCustomerGroupRate(key);
-            }
-        });
+    let $submitButton = $(this);
+    $submitButton.prop('disabled', true); // Disable button
+
+    $.ajax({
+        type: 'POST',
+        url: '{{route('customer.store')}}',
+        data: $("#customer-form").serialize(),
+        success: function(response) {
+            let key = response['id'];
+            let value = response['name'] + ' [' + response['phone_number'] + ']';
+
+            // Add new customer to the select dropdown
+            $('select[name="customer_id"]').append('<option value="' + key + '">' + value + '</option>');
+            $('select[name="customer_id"]').val(key);
+            $('.selectpicker').selectpicker('refresh');
+            $("#addCustomer").modal('hide');
+
+            // Call function and show success alert
+            setCustomerGroupRate(key);
+            alert('Thêm khách hàng thành công!');
+        },
+        error: function(xhr, status, error) {
+            alert('Đã xảy ra lỗi khi thêm khách hàng. Vui lòng thử lại.');
+        },
+        complete: function() {
+            $submitButton.prop('disabled', false); // Enable button
+        }
     });
+});
+
 
     function setCustomerGroupRate(id) {
         $.get('getcustomergroup/' + id, function(data) {
@@ -1560,82 +1538,136 @@ $('select[name="order_tax_rate"]').on("change", function() {
     calculateGrandTotal();
 });
 
-$('select[name="payment_status"]').on("change", function() {
-    var payment_status = $(this).val();
-    if (payment_status == 3 || payment_status == 4) {
-        $("#paid-amount").prop('disabled',false);
-        $("#payment").show();
-        $("#paying-amount").prop('required',true);
-        $("#paid-amount").prop('required',true);
-        if(payment_status == 4){
-            $("#paid-amount").prop('disabled',true);
-            $('input[name="paying_amount[]"]').val($('input[name="grand_total"]').val());
-            $('input[name="paid_amount[]"]').val($('input[name="grand_total"]').val());
-        }
-    }
-    else{
-        $("#paying-amount").prop('required',false);
-        $("#paid-amount").prop('required',false);
-        $('input[name="paying_amount[]"]').val('');
-        $('input[name="paid_amount[]"]').val('');
-        $("#payment").hide();
-    }
-});
+// $('select[name="payment_status"]').on("change", function() {
+//     var payment_status = $(this).val();
+//     if (payment_status == 3 || payment_status == 4) {
+//         $("#paid-amount").prop('disabled',false);
+//         $("#payment").show();
+//         $("#paying-amount").prop('required',true);
+//         $("#paid-amount").prop('required',true);
+//         if(payment_status == 4){
+//             $("#paid-amount").prop('disabled',true);
+//             $('input[name="paying_amount[]"]').val($('input[name="grand_total"]').val());
+//             $('input[name="paid_amount[]"]').val($('input[name="grand_total"]').val());
+//         }
+//     }
+//     else{
+//         $("#paying-amount").prop('required',false);
+//         $("#paid-amount").prop('required',false);
+//         $('input[name="paying_amount[]"]').val('');
+//         $('input[name="paid_amount[]"]').val('');
+//         $("#payment").hide();
+//     }
+// });
 
-$('select[name="paid_by_id[]"]').on("change", function() {
-    var id = $(this).val();
-    $(".payment-form").off("submit");
-    $('input[name="cheque_no"]').attr('required', false);
-    $('select[name="gift_card_id"]').attr('required', false);
-    if(id == 2) {
-        $("#gift-card").show();
-        $.ajax({
-            url: 'get_gift_card',
-            type: "GET",
-            dataType: "json",
-            success:function(data) {
-                $('select[name="gift_card_id"]').empty();
-                $.each(data, function(index) {
-                    gift_card_amount[data[index]['id']] = data[index]['amount'];
-                    gift_card_expense[data[index]['id']] = data[index]['expense'];
-                    $('select[name="gift_card_id"]').append('<option value="'+ data[index]['id'] +'">'+ data[index]['card_no'] +'</option>');
-                });
-                $('.selectpicker').selectpicker('refresh');
+
+        // Sửa lại sự kiện khi số tiền đặt cọc thay đổi
+        $('input[name="paying_amount[]"]').on("input", function() {
+            var deposit = parseFloat($(this).val()) || 0; // Số tiền đặt cọc
+            var grand_total = parseFloat($('input[name="grand_total"]').val()) || 0; // Tổng tiền
+
+            // Tính số tiền còn lại
+            var remaining = grand_total - deposit;
+
+            // Gán giá trị cho input số tiền còn lại
+            $('input[name="paid_amount[]"]').val(remaining.toFixed({{ $general_setting->decimal }}));
+        });
+
+        // Sửa lại phần xử lý payment_status
+        $('select[name="payment_status"]').on("change", function() {
+            var payment_status = $(this).val();
+            if (payment_status == 3 || payment_status == 4) {
+                $("#payment").show();
+                $("#paying-amount").prop('required', true);
+                $("#paid-amount").prop('required', true);
+
+                if (payment_status == 4) {
+                    // Trường hợp đã thanh toán hết
+                    $('input[name="paying_amount[]"]').val($('input[name="grand_total"]').val());
+                    $('input[name="paid_amount[]"]').val(0);
+                }
+            } else {
+                // Trường hợp chưa thanh toán
+                $("#payment").hide();
+                $("#paying-amount").prop('required', false);
+                $("#paid-amount").prop('required', false);
+                $('input[name="paying_amount[]"]').val('');
+                $('input[name="paid_amount[]"]').val('');
             }
         });
-        $(".card-element").hide();
-        $("#cheque").hide();
-        $('select[name="gift_card_id"]').attr('required', true);
-    }
-    else if (id == 3) {
-        @if($lims_pos_setting_data && (strlen($lims_pos_setting_data->stripe_public_key)>0) && (strlen($lims_pos_setting_data->stripe_secret_key )>0))
-            $.getScript( "../vendor/stripe/checkout.js" );
-            $(".card-element").show();
-            $(".card-errors").show();
-        @endif
-        $("#gift-card").hide();
-        $("#cheque").hide();
-    }
-    else if (id == 4) {
-        $("#cheque").show();
-        $("#gift-card").hide();
-        $(".card-element").hide();
-        $('input[name="cheque_no"]').attr('required', true);
-    }
-    else {
-        $("#gift-card").hide();
-        $(".card-element").hide();
-        $("#cheque").hide();
-        if (id == 6) {
-            if($('input[name="paid_amount[]"]').val() > deposit[$('#customer_id').val()]){
-                alert('Amount exceeds customer deposit! Customer deposit : '+ deposit[$('#customer_id').val()]);
+
+        // Sửa lại validate form submit
+        $('#quotation-form').on('submit', function(e) {
+            var rownumber = $('table.order-list tbody tr:last').index();
+            if (rownumber < 0) {
+                alert("Please insert product to order table!")
+                e.preventDefault();
+                return;
             }
-        }
-        else if (id == 7) {
-            pointCalculation();
-        }
-    }
-});
+
+            // Đảm bảo số tiền còn lại được gửi đi
+            if ($('input[name="paid_amount[]"]').val() === '') {
+                $('input[name="paid_amount[]"]').val(0);
+            }
+
+            $("#submit-button").prop('disabled', true);
+        });
+
+// $('select[name="paid_by_id[]"]').on("change", function() {
+//     var id = $(this).val();
+//     $(".payment-form").off("submit");
+//     $('input[name="cheque_no"]').attr('required', false);
+//     $('select[name="gift_card_id"]').attr('required', false);
+//     if(id == 2) {
+//         $("#gift-card").show();
+//         $.ajax({
+//             url: 'get_gift_card',
+//             type: "GET",
+//             dataType: "json",
+//             success:function(data) {
+//                 $('select[name="gift_card_id"]').empty();
+//                 $.each(data, function(index) {
+//                     gift_card_amount[data[index]['id']] = data[index]['amount'];
+//                     gift_card_expense[data[index]['id']] = data[index]['expense'];
+//                     $('select[name="gift_card_id"]').append('<option value="'+ data[index]['id'] +'">'+ data[index]['card_no'] +'</option>');
+//                 });
+//                 $('.selectpicker').selectpicker('refresh');
+//             }
+//         });
+//         $(".card-element").hide();
+//         $("#cheque").hide();
+//         $('select[name="gift_card_id"]').attr('required', true);
+//     }
+//     else if (id == 3) {
+//         @if($lims_pos_setting_data && (strlen($lims_pos_setting_data->stripe_public_key)>0) && (strlen($lims_pos_setting_data->stripe_secret_key )>0))
+//             $.getScript( "../vendor/stripe/checkout.js" );
+//             $(".card-element").show();
+//             $(".card-errors").show();
+//         @endif
+//         $("#gift-card").hide();
+//         $("#cheque").hide();
+//     }
+//     else if (id == 4) {
+//         $("#cheque").show();
+//         $("#gift-card").hide();
+//         $(".card-element").hide();
+//         $('input[name="cheque_no"]').attr('required', true);
+//     }
+//     else {
+//         $("#gift-card").hide();
+//         $(".card-element").hide();
+//         $("#cheque").hide();
+//         if (id == 6) {
+//             if($('input[name="paid_amount[]"]').val() > deposit[$('#customer_id').val()]){
+//                 alert('Amount exceeds customer deposit! Customer deposit : '+ deposit[$('#customer_id').val()]);
+//             }
+//         }
+//         else if (id == 7) {
+//             pointCalculation();
+//         }
+//     }
+// });
+
 
 function pointCalculation() {
     paid_amount = $('input[name=paid_amount[]]').val();
@@ -1656,11 +1688,8 @@ $('select[name="gift_card_id"]').on("change", function() {
 });
 
 $('input[name="paid_amount[]"]').on("input", function() {
-    if( $(this).val() > parseFloat($('input[name="paying_amount[]"]').val()) ) {
-        alert('Paying amount cannot be bigger than recieved amount');
-        $(this).val('');
-    }
-    else if( $(this).val() > parseFloat($('#grand_total').text()) ){
+
+    if( $(this).val() > parseFloat($('#grand_total').text()) ){
         alert('Paying amount cannot be bigger than grand total');
         $(this).val('');
     }
@@ -1726,12 +1755,6 @@ $(document).on('submit', '.payment-form', function(e) {
     // Kiểm tra tổng số lượng sản phẩm
     if (parseFloat($('input[name="total_qty"]').val()) <= 0) {
         errorMessages.push("Product quantity is 0");
-        isValid = false;
-    }
-
-    // Kiểm tra số tiền thanh toán
-    if (parseFloat($("#paying-amount").val()) < parseFloat($("#paid-amount").val())) {
-        errorMessages.push("Paying amount cannot be bigger than received amount");
         isValid = false;
     }
 
@@ -1846,18 +1869,26 @@ $('#edit-customer-form').on('submit', function (e) {
         type: 'PUT',
         data: formData,
         success: function (response) {
-            // Handle success (e.g., show a success message, update the UI)
+            // Cập nhật thành công
             alert('Customer updated successfully!');
             $('#editCustomerModal').modal('hide');
-            // Optionally reload a specific part of the page
-            location.reload(); // Remove this if you don't want to reload
+
+            // Cập nhật thông tin trong dropdown
+            const updatedName = $('#edit-customer-name').val();
+            const updatedPhone = $('#edit-customer-phone').val();
+
+            // Tìm option tương ứng và cập nhật nội dung
+            $(`#customer_id option[value="${customerId}"]`).text(`${updatedName} (${updatedPhone})`);
+
+            // Refresh lại selectpicker (nếu đang dùng selectpicker)
+            $('#customer_id').selectpicker('refresh');
         },
         error: function (xhr) {
-            // Handle errors
             alert('Failed to update customer!');
         }
     });
 });
+
 
 
 </script>

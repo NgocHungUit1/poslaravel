@@ -72,13 +72,13 @@
                         <th>{{ trans('file.Image') }} 1</th>
                         <th>{{ trans('file.Image') }} 2</th>
                         <th>{{ trans('file.reference') }}</th>
-                        <th>{{ trans('file.Warehouse') }}</th>
+                        {{-- <th>{{ trans('file.Warehouse') }}</th> --}}
                         <th>{{ trans('file.Biller') }}</th>
                         <th>{{ trans('file.customer') }}</th>
-                        <th>{{ trans('file.Supplier') }}</th>
+                        {{-- <th>{{ trans('file.Supplier') }}</th> --}}
                         <th>{{ trans('file.Quotation Status') }}</th>
                         <!-- Thêm các cột mới -->
-                        <th>{{ trans('file.Payment Method') }}</th>
+                        {{-- <th>{{ trans('file.Payment Method') }}</th> --}}
                         <th>{{ trans('file.grand total') }}</th>
                         <th>{{ trans('file.Paid Amount') }}</th>
                         <th>{{ trans('file.Debt Amount') }}</th>
@@ -91,9 +91,6 @@
                 <tfoot class="tfoot active">
                     <th></th>
                     <th>{{ trans('file.Total') }}</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -135,7 +132,7 @@
                             <img src="{{ url('logo', $general_setting->site_logo) }}" height="70" width="120">
                         </div>
                         <div class="col-md-12 " style="font-size: 40px; margin-left: 200px;">
-                            <i ></i>Báo giá/Đơn đặt hàng
+                            <i></i>Báo giá/Đơn đặt hàng
                         </div>
 
                     </div>
@@ -147,8 +144,8 @@
                     <thead>
                         <th>#</th>
                         <th>{{ trans('file.product') }}</th>
-                        <th>{{ trans('file.Image') }}  1</th>
-                        <th>{{ trans('file.Image')  }} 2</th>
+                        <th>{{ trans('file.Image') }} 1</th>
+                        <th>{{ trans('file.Image') }} 2</th>
                         <th>Qty</th>
                         <th>{{ trans('file.Unit Price') }}</th>
                         {{-- <th>{{ trans('file.Tax') }}</th>
@@ -280,24 +277,18 @@
                 {
                     "data": "reference_no"
                 },
-                {
-                    "data": "warehouse"
-                },
+
                 {
                     "data": "biller"
                 },
                 {
                     "data": "customer"
                 },
-                {
-                    "data": "supplier"
-                },
+
                 {
                     "data": "status"
                 },
-                {
-                    "data": "paying_method"
-                },
+
                 {
                     "data": "grand_total"
                 },
@@ -459,11 +450,11 @@
             if (dt_selector.rows('.selected').any() && is_calling_first) {
                 var rows = dt_selector.rows('.selected').indexes();
 
-                $(dt_selector.column(13).footer()).html(dt_selector.cells(rows, 13, {
+                $(dt_selector.column(11).footer()).html(dt_selector.cells(rows, 11, {
                     page: 'current'
                 }).data().sum().toFixed({{ $general_setting->decimal }}));
             } else {
-                $(dt_selector.column(13).footer()).html(dt_selector.cells(rows, 13, {
+                $(dt_selector.column(11).footer()).html(dt_selector.cells(rows, 11, {
                     page: 'current'
                 }).data().sum().toFixed({{ $general_setting->decimal }}));
             }
@@ -481,8 +472,7 @@
 
             // Cột trái - Thông tin cơ bản
             htmltext += '<div class="col-md-12">' +
-                '<strong> Ngày Báo Giá: </strong>' + quotation[0]  + " |" +  '<strong> Số Báo Giá: </strong>' + quotation[1]
-             ;
+                '<strong> Ngày Báo Giá: </strong>' + quotation[0] + " |" + '<strong> Số Báo Giá: </strong>' + quotation[1];
 
 
 
@@ -547,20 +537,20 @@
                 var batch_no = data[7];
                 var newBody = $("<tbody>");
 
-                 $.each(name_code, function(index) {
-        var newRow = $("<tr>");
-        var cols = '';
-        cols += '<td><strong>' + (index + 1) + '</strong></td>';
-        cols += '<td>' + name_code[index] + '</td>';
-        cols += '<td>' + quotation[28] + '</td>';
-        cols += '<td>' + quotation[29] + '</td>';
-        cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
-        cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(
-            {{ $general_setting->decimal }}) + '</td>';
-        cols += '<td>' + subtotal[index] + '</td>';
-        newRow.append(cols);
-        newBody.append(newRow);
-    });
+                $.each(name_code, function(index) {
+                    var newRow = $("<tr>");
+                    var cols = '';
+                    cols += '<td><strong>' + (index + 1) + '</strong></td>';
+                    cols += '<td>' + name_code[index] + '</td>';
+                    cols += '<td>' + quotation[28] + '</td>';
+                    cols += '<td>' + quotation[29] + '</td>';
+                    cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
+                    cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(
+                        {{ $general_setting->decimal }}) + '</td>';
+                    cols += '<td>' + subtotal[index] + '</td>';
+                    newRow.append(cols);
+                    newBody.append(newRow);
+                });
                 // Thêm các dòng tổng
                 var newRow = $("<tr>");
                 cols = '';
@@ -572,28 +562,31 @@
                 newBody.append(newRow);
 
                 // Thêm dòng Paid Amount (Số tiền đã thanh toán)
-             // Tạo hàng chứa tiêu đề "Phương thức thanh toán"
-newRow = $("<tr>");
-cols = '';
-cols += '<td colspan=7 style="font-weight: bold; background-color: #f2f2f2; text-align: left;">Phương thức thanh toán</td>';
-newRow.append(cols);
-newBody.append(newRow);
+                // Tạo hàng chứa tiêu đề "Phương thức thanh toán"
+                newRow = $("<tr>");
+                cols = '';
+                cols +=
+                    '<td colspan=7 style="font-weight: bold; background-color: #f2f2f2; text-align: left;">Phương thức thanh toán</td>';
+                newRow.append(cols);
+                newBody.append(newRow);
 
-// Thêm nội dung "Đợt 1"
-newRow = $("<tr>");
-cols = '';
-cols += '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 1: Thanh toán tạm ứng cọc 50% giá trị đơn đặt hàng:</strong></td>';
-cols += '<td style="text-align: right;">' + quotation[23] + '</td>'; // Paid Amount
-newRow.append(cols);
-newBody.append(newRow);
+                // Thêm nội dung "Đợt 1"
+                newRow = $("<tr>");
+                cols = '';
+                cols +=
+                    '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 1: Thanh toán tạm ứng cọc 50% giá trị đơn đặt hàng:</strong></td>';
+                cols += '<td style="text-align: right;">' + quotation[23] + '</td>'; // Paid Amount
+                newRow.append(cols);
+                newBody.append(newRow);
 
-// Thêm nội dung "Đợt 2"
-newRow = $("<tr>");
-cols = '';
-cols += '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 2: Thanh toán 50% giá trị còn lại bằng tiền mặt khi nhận hàng (COD) hoặc chuyển khoản thanh toán trước phần còn lại trước khi hàng xuất kho:</strong></td>';
-cols += '<td style="text-align: right;">' + quotation[24] + '</td>'; // Paid Amount
-newRow.append(cols);
-newBody.append(newRow);
+                // Thêm nội dung "Đợt 2"
+                newRow = $("<tr>");
+                cols = '';
+                cols +=
+                    '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 2: Thanh toán 50% giá trị còn lại bằng tiền mặt khi nhận hàng (COD) hoặc chuyển khoản thanh toán trước phần còn lại trước khi hàng xuất kho:</strong></td>';
+                cols += '<td style="text-align: right;">' + quotation[24] + '</td>'; // Paid Amount
+                newRow.append(cols);
+                newBody.append(newRow);
 
 
                 // // Thêm dòng Debt Amount (Số tiền còn nợ)
@@ -618,13 +611,15 @@ newBody.append(newRow);
                 newBody.append(newRow);
 
                 newRow = $("<tr>");
-cols = '';
-cols += '<td colspan=8 style="color: brown;">';
-cols += '<p>(*) Các thông tin về Size, Số áo sẽ chốt qua Zalo hoặc Email tùy yêu cầu khách hàng</p>';
-cols += '<p>(**) Xuất hóa đơn VAT (Nếu có theo yêu cầu quý khách): Hóa đơn điện tử VAT sẽ được xuất qua Email từ 1-2 ngày sau khi đơn hàng hoàn tất</p>';
-cols += '</td>';
-newRow.append(cols);
-newBody.append(newRow);
+                cols = '';
+                cols += '<td colspan=8 style="color: brown;">';
+                cols +=
+                '<p>(*) Các thông tin về Size, Số áo sẽ chốt qua Zalo hoặc Email tùy yêu cầu khách hàng</p>';
+                cols +=
+                    '<p>(**) Xuất hóa đơn VAT (Nếu có theo yêu cầu quý khách): Hóa đơn điện tử VAT sẽ được xuất qua Email từ 1-2 ngày sau khi đơn hàng hoàn tất</p>';
+                cols += '</td>';
+                newRow.append(cols);
+                newBody.append(newRow);
 
 
                 $("table.product-quotation-list").append(newBody);

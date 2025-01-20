@@ -18,7 +18,7 @@
                         <th class="not-exported"></th>
                         <th>{{ trans('file.Delivery Reference') }}</th>
                         <th>{{ trans('file.Sale Reference') }}</th>
-                        <th>{{ trans('file.Packing Slip Reference') }}</th>
+                        <th>{{ trans('file.Ship Code') }}</th>
                         <th>{{ trans('file.customer') }}</th>
                         <th>{{ trans('file.Courier') }}</th>
                         <th>{{ trans('file.Address') }}</th>
@@ -79,7 +79,7 @@
                                 <td>{{ $key }}</td>
                                 <td>{{ $delivery->reference_no }}</td>
                                 <td>{{ $customer_sale[0]->reference_no }}</td>
-                                <td>{{ implode(',', $packing_slip_references) }}</td>
+                                <td>{{$delivery->ship_code }}</td>
                                 <td>{!! $customer_sale[0]->name . '<br>' . $customer_sale[0]->phone_number !!}</td>
                                 @if ($delivery->courier_id)
                                     <td>{{ $delivery->courier->name }}</td>

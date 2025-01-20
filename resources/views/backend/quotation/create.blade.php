@@ -79,6 +79,9 @@
                                                         <button type="button" class="btn btn-default btn-sm"
                                                             data-toggle="modal" data-target="#addCustomer"><i
                                                                 class="dripicons-plus"></i></button>
+                                                                <button type="button" id="editCustomerBtn" class="btn btn-default btn-sm" data-toggle="modal" data-target="#editCustomerModal">
+                                                                    <i class="dripicons-document-edit"></i>
+                                                                </button>
                                                     @else
                                                         <select required name="customer_id" id="customer_id"
                                                             class="selectpicker form-control" data-live-search="true"
@@ -505,6 +508,73 @@
             </div>
             {{ Form::close() }}
           </div>
+        </div>
+    </div>
+
+    <div id="editCustomerModal" class="modal fade text-left" tabindex="-1" role="dialog">
+        <div role="document" class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="edit-customer-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ trans('file.Edit Customer') }}</h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="italic">
+                            <small>{{ trans('file.The field labels marked with * are required input fields') }}.</small>
+                        </p>
+                        <input type="hidden" name="customer_id" id="edit-customer-id">
+
+                        <!-- Customer Group -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Customer Group') }} *</label>
+                            <select required class="form-control selectpicker" name="customer_group_id" id="edit-customer-group-id">
+                                @foreach($lims_customer_group_all as $customer_group)
+                                    <option value="{{ $customer_group->id }}">{{ $customer_group->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Name -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Name') }} *</label>
+                            <input type="text" name="customer_name" id="edit-customer-name" class="form-control" required>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Email') }}</label>
+                            <input type="email" name="email" id="edit-customer-email" class="form-control" placeholder="example@example.com">
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Phone Number') }}</label>
+                            <input type="text" name="phone_number" id="edit-customer-phone" class="form-control">
+                        </div>
+
+                        <!-- Address -->
+                        <div class="form-group">
+                            <label>{{ trans('file.Address') }}</label>
+                            <input type="text" name="address" id="edit-customer-address" class="form-control">
+                        </div>
+
+                        <!-- City -->
+                        <div class="form-group">
+                            <label>{{ trans('file.City') }}</label>
+                            <input type="text" name="city" id="edit-customer-city" class="form-control">
+                        </div>
+
+                        <!-- Add more fields if needed -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">{{ trans('file.Save') }}</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ trans('file.Close') }}</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     </section>
@@ -1191,21 +1261,36 @@
         }
 
         $('.customer-submit-btn').on("click", function() {
-        $.ajax({
-            type:'POST',
-            url:'{{route('customer.store')}}',
-            data: $("#customer-form").serialize(),
-            success:function(response) {
-                key = response['id'];
-                value = response['name']+' ['+response['phone_number']+']';
-                $('select[name="customer_id"]').append('<option value="'+ key +'">'+ value +'</option>');
-                $('select[name="customer_id"]').val(key);
-                $('.selectpicker').selectpicker('refresh');
-                $("#addCustomer").modal('hide');
-                setCustomerGroupRate(key);
-            }
-        });
+    let $submitButton = $(this);
+    $submitButton.prop('disabled', true); // Disable button
+
+    $.ajax({
+        type: 'POST',
+        url: '{{route('customer.store')}}',
+        data: $("#customer-form").serialize(),
+        success: function(response) {
+            let key = response['id'];
+            let value = response['name'] + ' [' + response['phone_number'] + ']';
+
+            // Add new customer to the select dropdown
+            $('select[name="customer_id"]').append('<option value="' + key + '">' + value + '</option>');
+            $('select[name="customer_id"]').val(key);
+            $('.selectpicker').selectpicker('refresh');
+            $("#addCustomer").modal('hide');
+
+            // Call function and show success alert
+            setCustomerGroupRate(key);
+            alert('Thêm khách hàng thành công!');
+        },
+        error: function(xhr, status, error) {
+            alert('Đã xảy ra lỗi khi thêm khách hàng. Vui lòng thử lại.');
+        },
+        complete: function() {
+            $submitButton.prop('disabled', false); // Enable button
+        }
     });
+});
+
 
         // Sửa lại sự kiện khi số tiền đặt cọc thay đổi
         $('input[name="paying_amount[]"]').on("input", function() {
@@ -1258,5 +1343,54 @@
 
             $("#submit-button").prop('disabled', true);
         });
+
+        document.getElementById('editCustomerBtn').addEventListener('click', function () {
+    const customerId = document.getElementById('customer_id').value;
+
+    if (!customerId) {
+        alert('Vui lòng chọn khách hàng trước khi chỉnh sửa!');
+        return;
+    }
+
+
+    // Fetch customer details and populate the modal
+    $.get(`/customer/${customerId}`, function (data) {
+        $('#edit-customer-id').val(data.id);
+        $('#edit-customer-name').val(data.name);
+        $('#edit-customer-phone').val(data.phone_number);
+        $('#editCustomerModal').modal('show');
+    });
+});
+
+$('#edit-customer-form').on('submit', function (e) {
+    e.preventDefault();
+
+    const formData = $(this).serialize();
+    const customerId = $('#edit-customer-id').val();
+
+    $.ajax({
+        url: `/customer/${customerId}`,
+        type: 'PUT',
+        data: formData,
+        success: function (response) {
+            // Cập nhật thành công
+            alert('Customer updated successfully!');
+            $('#editCustomerModal').modal('hide');
+
+            // Cập nhật thông tin trong dropdown
+            const updatedName = $('#edit-customer-name').val();
+            const updatedPhone = $('#edit-customer-phone').val();
+
+            // Tìm option tương ứng và cập nhật nội dung
+            $(`#customer_id option[value="${customerId}"]`).text(`${updatedName} (${updatedPhone})`);
+
+            // Refresh lại selectpicker (nếu đang dùng selectpicker)
+            $('#customer_id').selectpicker('refresh');
+        },
+        error: function (xhr) {
+            alert('Failed to update customer!');
+        }
+    });
+});
     </script>
 @endpush

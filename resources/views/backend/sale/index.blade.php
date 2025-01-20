@@ -1481,7 +1481,7 @@
                ;
 
 
-            if (sale[30])
+
                 htmltext += `
     <br>
 <div class="delivery-info">
@@ -1489,7 +1489,7 @@
         <!-- Thông tin người gửi -->
         <div class="col-md-6">
             <div class="bordered-box customer">
-                <strong>Thông tin người gửi </strong><br>
+                <strong>Thông tin người bán </strong><br>
                 <strong>Tên công ty </strong> ${sale[4]}<br>
                 <strong>Email </strong> ${sale[5]}<br>
                 <strong>Số điện thoại </strong> ${sale[6]}<br>
