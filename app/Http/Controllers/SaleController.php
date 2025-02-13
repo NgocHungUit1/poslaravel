@@ -148,6 +148,7 @@ class SaleController extends Controller
                 $field_name[] = str_replace(" ", "_", strtolower($fieldName));
             }
             $smsTemplates = SmsTemplate::all();
+
             return view('backend.sale.index', compact('starting_date', 'ending_date', 'warehouse_id', 'sale_status', 'payment_status', 'sale_type', 'payment_method', 'lims_gift_card_list', 'lims_pos_setting_data', 'lims_reward_point_setting_data', 'lims_account_list', 'lims_warehouse_list', 'all_permission', 'options', 'numberOfInvoice', 'custom_fields', 'field_name', 'lims_courier_list', 'smsTemplates'));
         } else
             return redirect()->back()->with('not_permitted', 'Sorry! You are not allowed to access this module');
@@ -417,13 +418,12 @@ class SaleController extends Controller
                 }
 
 
-
-                $nestedData['grand_total'] = number_format($sale->grand_total, config('decimal'));
-                //$nestedData['grand_total'] = \Illuminate\Support\Number::format($sale->grand_total, locale: 'id');
+                $nestedData['grand_total'] = number_format($sale->grand_total) ;
                 $returned_amount = DB::table('returns')->where('sale_id', $sale->id)->sum('grand_total');
-                $nestedData['returned_amount'] = number_format($returned_amount, config('decimal'));
-                $nestedData['paid_amount'] = number_format($sale->paid_amount, config('decimal'));
-                $nestedData['due'] = number_format($sale->grand_total - $returned_amount - $sale->paid_amount, config('decimal'));
+                $nestedData['returned_amount'] = number_format($returned_amount) ;
+                $nestedData['paid_amount'] = number_format($sale->paid_amount) ;
+                $nestedData['due'] = number_format($sale->grand_total - $returned_amount - $sale->paid_amount) ;
+
 
                 //fetching custom fields data
                 foreach ($field_names as $field_name) {
@@ -806,6 +806,9 @@ class SaleController extends Controller
         //inserting data to sales table
         // return $data;
         $data['sale_status'] = 2;
+        $paidAmount = $request->paying_amount[0] ?? "0";
+        $data['paid_amount'] = $paidAmount;
+
         $lims_sale_data = Sale::create($data);
 
         // add the $new_data variable value to $data['paid_amount'] variable
@@ -2195,16 +2198,16 @@ class SaleController extends Controller
             $product_sale->product_id = $product['id'];
             $product_sale->qty = $mail_data['qty'][$key] = $qty[$key];
             $product_sale->sale_unit_id = $sale_unit_id;
-            $product_sale->net_unit_price = number_format((float)$net_unit_price, config('decimal'), '.', '');
+            $product_sale->net_unit_price = number_format((float)$net_unit_price);
             $product_sale->discount = $discount[$key] * $qty[$key];
             $product_sale->tax_rate = $tax[$key]['rate'];
-            $product_sale->tax = number_format((float)$product_tax, config('decimal'), '.', '');
-            $product_sale->total = $mail_data['total'][$key] = number_format((float)$total, config('decimal'), '.', '');
+            $product_sale->tax = number_format((float)$product_tax);
+            $product_sale->total = $mail_data['total'][$key] = number_format((float)$total);
             $product_sale->save();
             $lims_sale_data->total_qty += $qty[$key];
             $lims_sale_data->total_discount += $discount[$key] * $qty[$key];
-            $lims_sale_data->total_tax += number_format((float)$product_tax, config('decimal'), '.', '');
-            $lims_sale_data->total_price += number_format((float)$total, config('decimal'), '.', '');
+            $lims_sale_data->total_tax += number_format((float)$product_tax);
+            $lims_sale_data->total_price += number_format((float)$total);
         }
         $lims_sale_data->item = $key + 1;
         $lims_sale_data->order_tax = ($lims_sale_data->total_price - $lims_sale_data->order_discount) * ($data['order_tax_rate'] / 100);

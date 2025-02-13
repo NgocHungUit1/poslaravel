@@ -228,7 +228,7 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 d-none">
                                             <div class="form-group">
                                                 <label>{{ trans('file.Order Tax') }}</label>
                                                 <select class="form-control" name="order_tax_rate">
@@ -239,20 +239,14 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 d-none">
                                             <div class="form-group">
                                                 <label>{{ trans('file.Order Discount') }}</label>
                                                 <input type="number" name="order_discount" class="form-control"
                                                     step="any">
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>{{ trans('file.Shipping Cost') }}</label>
-                                                <input type="number" name="shipping_cost" class="form-control"
-                                                    step="any">
-                                            </div>
-                                        </div>
+
                                     </div>
                                     <div class="row">
                                         <div class="col-md-4">
@@ -301,6 +295,13 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>{{ trans('file.Shipping Cost') }}</label>
+                                                <input type="number" name="shipping_cost" class="form-control"
+                                                    step="any">
+                                            </div>
+                                        </div>
 
 
                                     </div>
@@ -322,7 +323,7 @@
                                                 <div class="form-group">
                                                     <label>Số tiền đặt cọc *</label>
                                                     <input type="number" name="paying_amount[]" class="form-control"
-                                                        id="paying-amount" step="any" value="0" />
+                                                        id="paying-amount" step="any"  />
                                                 </div>
                                             </div>
 

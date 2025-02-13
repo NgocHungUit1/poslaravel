@@ -197,7 +197,7 @@
                         </div>
                         <div class="col-md-4 text-center">
                             <h3 id="exampleModalLabel" class="modal-title container-fluid">
-                                {{ $general_setting->site_title }}</h3>
+                                HÓA ĐƠN </h3>
                         </div>
                         <div class="col-md-4 text-right">
                             <i style="font-size: 15px;">{{ trans('file.Invoice') }}</i>
@@ -211,8 +211,8 @@
                     <thead>
                         <th>#</th>
                         <th>{{ trans('file.product') }}</th>
-                        <th>{{ trans('file.Image') }}  1</th>
-                        <th>{{ trans('file.Image')  }} 2</th>
+                        <th>{{ trans('file.Image') }} 1</th>
+                        <th>{{ trans('file.Image') }} 2</th>
                         <th>{{ trans('file.Qty') }}</th>
                         {{-- <th>{{ trans('file.Returned') }}</th> --}}
                         <th>{{ trans('file.Unit Price') }}</th>
@@ -837,7 +837,7 @@
         $(document).on("change", ".is-packing", function(e) {
             rowindex = $(this).closest('tr').index();
             var total_price = $('table.product-list tbody tr:nth-child(' + (rowindex + 1) + ') .total-price')
-        .text();
+                .text();
             var amount = $("#packing-slip-modal input[name=amount]").val();
             if ($(this).is(":checked")) {
                 $("#packing-slip-modal input[name=amount]").val(parseFloat(amount) + parseFloat(total_price));
@@ -1477,12 +1477,11 @@
 
             var htmltext = '<strong>{{ trans('file.date') }}: </strong>' + sale[0] +
                 '<br><strong>{{ trans('file.reference') }}: </strong>' + sale[1] +
-                '<br><strong>{{ trans('file.Sale Status') }}: </strong>' + sale[2]
-               ;
+                '<br><strong>{{ trans('file.Sale Status') }}: </strong>' + sale[2];
 
 
 
-                htmltext += `
+            htmltext += `
     <br>
 <div class="delivery-info">
     <div class="row">
@@ -1515,7 +1514,7 @@
                 <strong>Tên và SDT ngươi nhận </strong> ${sale[36]} - ${sale[37]} <br>
                 <strong>Địa chỉ </strong> ${sale[34]}<br>
                 <strong>Đơn vị giao hàng </strong> ${sale[33]}<br>
-                  <strong>{{trans('file.Delivery Status') }}</strong> ${sale[32]}<br>
+                  <strong>{{ trans('file.Delivery Status') }}</strong> ${sale[32]}<br>
             </div>
         </div>
     </div>
@@ -1548,11 +1547,13 @@
                     cols += '<td>' + sale[41] + '</td>';
                     cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
                     // cols += '<td>' + return_qty[index] + '</td>';
-                    cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(
-                        {{ $general_setting->decimal }}) + '</td>';
+
+                    cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toLocaleString('en-US') +
+                        '</td>'; // Dấu phẩy
                     // cols += '<td>' + tax[index] + '(' + tax_rate[index] + '%)' + '</td>';
                     // cols += '<td>' + discount[index] + '</td>';
-                    cols += '<td>' + subtotal[index] + '</td>';
+                    cols += '<td>' + parseFloat(subtotal[index]).toLocaleString('en-US') +
+                    '</td>'; // Dấu phẩy
                     // cols += '<td>' + is_delivered[index] + '</td>';
                     total_qty += parseFloat(qty[index]);
                     newRow.append(cols);
@@ -1566,7 +1567,7 @@
                 cols += '<td colspan=1></td>';
                 // cols += '<td>' + sale[14] + '</td>';
                 // cols += '<td>' + sale[15] + '</td>';
-                cols += '<td>' + sale[16] + '</td>';
+                cols += '<td>' + parseFloat(sale[16]).toLocaleString('en-US') + '</td>'; // Dấu phẩy
 
                 newRow.append(cols);
                 newBody.append(newRow);
@@ -1577,7 +1578,7 @@
                     cols = '';
                     cols += '<td colspan=9><strong>{{ trans('file.Coupon Discount') }} [' + sale[28] +
                         ']:</strong></td>';
-                    cols += '<td>' + sale[29] + '</td>';
+                    cols += '<td>' + parseFloat(sale[29]).toLocaleString('en-US') + '</td>'; // Dấu phẩy
                     newRow.append(cols);
                     newBody.append(newRow);
                 }
@@ -1585,31 +1586,32 @@
                 var newRow = $("<tr>");
                 cols = '';
                 cols += '<td colspan=6><strong>{{ trans('file.Shipping Cost') }}:</strong></td>';
-                cols += '<td>' + sale[20] + '</td>';
+                cols += '<td>' + parseFloat(sale[20]).toLocaleString('en-US') + '</td>'; // Dấu phẩy
                 newRow.append(cols);
                 newBody.append(newRow);
 
                 var newRow = $("<tr>");
                 cols = '';
                 cols += '<td colspan=6><strong>{{ trans('file.grand total') }}:</strong></td>';
-                cols += '<td>' + sale[21] + '</td>';
+                cols += '<td>' + parseFloat(sale[21]).toLocaleString('en-US') + '</td>'; // Dấu phẩy
                 newRow.append(cols);
                 newBody.append(newRow);
 
                 var newRow = $("<tr>");
                 cols = '';
                 cols += '<td colspan=6><strong>{{ trans('file.Paid Amount') }}:</strong></td>';
-                cols += '<td>' + sale[22] + '</td>';
+                cols += '<td>' + parseFloat(sale[22]).toLocaleString('en-US') + '</td>'; // Dấu phẩy
                 newRow.append(cols);
                 newBody.append(newRow);
 
                 var newRow = $("<tr>");
                 cols = '';
-                cols += '<td colspan=6><strong>{{ trans('file.Due') }}:</strong></td>';
-                cols += '<td>' + parseFloat(sale[21] - sale[22]).toFixed({{ $general_setting->decimal }}) +
-                    '</td>';
+                cols += '<td colspan=6><strong>Còn lại:</strong></td>';
+                cols += '<td>' + parseFloat(sale[21] - sale[22]).toLocaleString('en-US') + '</td>'; // Dấu phẩy
                 newRow.append(cols);
                 newBody.append(newRow);
+
+
 
                 $("table.product-sale-list").append(newBody);
             });
@@ -1627,7 +1629,7 @@
                     {{ $general_setting->decimal }}));
                 e.preventDefault();
             } else if ($('input[name="edit_paying_amount"]').val() < parseFloat($('input[name="edit_amount"]')
-                .val())) {
+                    .val())) {
                 alert('Paying amount cannot be bigger than recieved amount');
                 $('input[name="edit_amount"]').val('');
                 $(".change").text(parseFloat($('input[name="edit_paying_amount"]').val() - $(
@@ -1736,6 +1738,7 @@
             box-sizing: border-box;
             /* Đảm bảo padding không làm thay đổi kích thước hộp */
         }
+
         .delivery-info .col-md-12 {
             flex: 1;
             /* Các cột chiếm không gian bằng nhau */

@@ -243,7 +243,7 @@
                                     </div>
                                 </div>
                                 <div class="row mt-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 d-none">
                                         <div class="form-group">
                                             <label>{{trans('file.Order Tax')}}</label>
                                             <select class="form-control" name="order_tax_rate">
@@ -254,7 +254,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-4 d-none">
                                         <div class="form-group">
                                             <label>{{trans('file.Order Discount Type')}}</label>
                                             <select id="order-discount-type" name="order_discount_type" class="form-control">
@@ -397,7 +397,7 @@
                                             <div class="form-group">
                                                 <label>Số tiền đặt cọc *</label>
                                                 <input type="number" name="paying_amount[]" class="form-control"
-                                                    id="paying-amount" step="any" value="0" />
+                                                    id="paying-amount" step="any" placeholder="Hãy nhập số tiền đặt cọc" />
                                             </div>
                                         </div>
 
@@ -1759,8 +1759,7 @@ $(document).on('submit', '.payment-form', function(e) {
     }
 
     // Kiểm tra trạng thái thanh toán
-    if ($('select[name="payment_status"]').val() == 3 &&
-        parseFloat($("#paid-amount").val()) == parseFloat($('input[name="grand_total"]').val())) {
+    if ($('select[name="payment_status"]').val() == 2 ) {
         errorMessages.push("Paying amount equals to grand total! Please change payment status.");
         isValid = false;
     }

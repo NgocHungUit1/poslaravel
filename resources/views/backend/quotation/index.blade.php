@@ -545,9 +545,8 @@
                     cols += '<td>' + quotation[28] + '</td>';
                     cols += '<td>' + quotation[29] + '</td>';
                     cols += '<td>' + qty[index] + ' ' + unit_code[index] + '</td>';
-                    cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toFixed(
-                        {{ $general_setting->decimal }}) + '</td>';
-                    cols += '<td>' + subtotal[index] + '</td>';
+                    cols += '<td>' + parseFloat(subtotal[index] / qty[index]).toLocaleString('en-US') + '</td>';
+                    cols += '<td>' + parseFloat(subtotal[index]).toLocaleString('en-US')+ '</td>';
                     newRow.append(cols);
                     newBody.append(newRow);
                 });
@@ -575,7 +574,7 @@
                 cols = '';
                 cols +=
                     '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 1: Thanh toán tạm ứng cọc 50% giá trị đơn đặt hàng:</strong></td>';
-                cols += '<td style="text-align: right;">' + quotation[23] + '</td>'; // Paid Amount
+                cols += '<td style="text-align: right;">' + parseFloat(quotation[23]).toLocaleString('en-US') + '</td>'; // Paid Amount
                 newRow.append(cols);
                 newBody.append(newRow);
 
@@ -584,7 +583,7 @@
                 cols = '';
                 cols +=
                     '<td colspan=6 style="padding-left: 20px;"><strong>Đợt 2: Thanh toán 50% giá trị còn lại bằng tiền mặt khi nhận hàng (COD) hoặc chuyển khoản thanh toán trước phần còn lại trước khi hàng xuất kho:</strong></td>';
-                cols += '<td style="text-align: right;">' + quotation[24] + '</td>'; // Paid Amount
+                cols += '<td style="text-align: right;">' +  parseFloat(quotation[24]).toLocaleString('en-US') + '</td>'; // Paid Amount
                 newRow.append(cols);
                 newBody.append(newRow);
 

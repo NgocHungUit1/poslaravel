@@ -492,13 +492,18 @@ class QuotationController extends Controller
                 }
             }
         }
-        $data['payment_method'] = $paying_method;
+
+
+
+        $data['payment_method'] = "Cash";
         $data['payment_status'] = $request->payment_status; // "3" for Partial
         $data['debt'] = $request->paid_amount[0];    // "500.00"
-        $data['paid_amount'] = $request->paying_amount[0]; // "77"
+        $paidAmount = $request->paying_amount[0] ?? "0";
+
+        $data['paid_amount'] = $paidAmount;
+
 
         $data['reference_no'] = 'qr-' . date("Ymd") . '-' . date("his");
-
         $lims_quotation_data = Quotation::create($data);
 
         if ($lims_quotation_data->quotation_status == 2) {
